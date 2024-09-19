@@ -25,24 +25,30 @@ enum UserStatus {
 }
 
 model User{
-  id Int
-  email String
-  password String
-  imageUrl String
-  role UserRole
-  displayName String
-  isVerified UserStatus
-  phoneNumber Int
+  id Int @id @default(autoincrement())
+  email String @unique
+  password String @db.Text
+  imageUrl String  @map("image_url") @db.Text
+  role UserRole @default(CUSTOMER)
+  displayName String @map("dispaly_name") @db.VarChar(12)
+  isVerified UserStatus @default(UNVERIFIED)
+  phoneNumber Int @map("phone_number")
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt 
+
+  //Relation
+  userToken UserToken?
+
 }
 
 model UserToken{
-  id Int
-  verifyToken String
-  verifyToken_exp DateTime
-  resetPasswordToken String
-  resetPasswordToken_Exp DateTime
-}
+  id Int @unique @default(autoincrement())
+  userId Int @unique @map("user_id")
+  verifyToken String @map("verify_token")
+  verifyToken_exp DateTime @map("verify_token_exp")
+  resetPasswordToken String @map("reset_password_token")
+  resetPasswordToken_Exp DateTime @map("reset_password_token_exp")
 
-model UserToken{}
+  //Relation 
+  user User @relation(fields: [userId], references: [id])
+}
