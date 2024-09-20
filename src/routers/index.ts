@@ -1,4 +1,4 @@
-import { Router } from "express";
+import express, { Router } from "express";
 import { AuthRouter } from "./auth-router";
 
 export class RootRouter {
@@ -9,10 +9,10 @@ export class RootRouter {
     this.authRouter = new AuthRouter();
     this.initializeRouter();
   }
-  private initializeRouter() {
+  private initializeRouter(): void {
     this.router.use("/auth", this.authRouter.getRouter());
   }
-  public getRouter() {
+  getRouter() {
     return this.router;
   }
 }

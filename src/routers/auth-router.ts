@@ -5,14 +5,17 @@ export class AuthRouter {
   private router: Router;
   private authController: AuthController;
   constructor() {
-    this.router = Router();
     this.authController = new AuthController();
+    this.router = Router();
     this.initializeRoutes();
   }
 
-  private initializeRoutes(): void {}
+  private initializeRoutes(): void {
+    this.router.post("/sign-up", this.authController.signUpUser);
+    this.router.post("/verify-account", this.authController.verifyAccountUser);
+  }
 
-  public getRouter() {
+  getRouter(): Router {
     return this.router;
   }
 }

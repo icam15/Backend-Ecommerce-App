@@ -1,6 +1,14 @@
-import express, { Express, NextFunction, Request, Response } from "express";
+import express, {
+  Express,
+  NextFunction,
+  Request,
+  Response,
+  Router,
+} from "express";
 import cookieParser from "cookie-parser";
 import { config } from "dotenv";
+import { errorMiddleware } from "./middleware/error-middleware";
+import { RootRouter } from "./routers";
 
 config();
 export class App {
@@ -9,19 +17,27 @@ export class App {
   constructor() {
     this.app = express();
     this.configuration();
+    this.routes();
+    this.handleError();
   }
   private configuration() {
     this.app.use(express.json());
     this.app.use(cookieParser());
-    this.app.get("/test", (req: Request, res: Response, next: NextFunction) => {
-      res.send("Test successfully");
-    });
+    // this.app.get("/test", (req: Request, res: Response, next: NextFunction) => {
+    //   res.send("Test successfully");
+    // });
   }
-  private routes() {}
-  private handleError() {}
+  private routes() {
+    const mainRouter = new RootRouter();
+    this.app.use("/api", mainRouter.getRouter());
+  }
+
+  private handleError() {
+    this.app.use(errorMiddleware);
+  }
   public run() {
     this.app.listen(this.PORT, () => {
-      console.log(`Server running on `);
+      console.log(`Server running`);
     });
   }
 }
