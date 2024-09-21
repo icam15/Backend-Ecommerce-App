@@ -1,10 +1,3 @@
-import express, {
-  Express,
-  NextFunction,
-  Request,
-  Response,
-  Router,
-} from "express";
 import cookieParser from "cookie-parser";
 import { config } from "dotenv";
 import { errorMiddleware } from "./middleware/error-middleware";
