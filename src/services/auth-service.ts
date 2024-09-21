@@ -291,4 +291,16 @@ export class AuthService {
       throw new ResponseError(400, "token expired");
     }
   }
+
+  static async logout(userId: number) {
+    await prisma.userToken.update({
+      where: {
+        userId,
+      },
+      data: {
+        refreshToken: "",
+        refreshToken_exp: undefined,
+      },
+    });
+  }
 }

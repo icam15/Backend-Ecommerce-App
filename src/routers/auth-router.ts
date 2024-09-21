@@ -23,6 +23,11 @@ export class AuthRouter {
       this.authController.getUserSession
     );
     this.router.get("/refresh-token", this.authController.getRefreshToken);
+    this.router.get(
+      "/logout",
+      authenticationUser,
+      this.authController.logoutUser
+    );
   }
 
   getRouter(): Router {

@@ -150,8 +150,21 @@ export class AuthController {
     }
   }
 
+  async logoutUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const session = req.user;
+      await AuthService.logout(session.id);
+      res.clearCookie("ecm_app_AT");
+      res.clearCookie("ecm_app_RT");
+      res.status(201).json({
+        status: "success",
+        message: "logged out success",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 
   async signUpUserWithGoogle() {}
   async redirectGoogleOauth() {}
-  async logoutUser() {}
 }
