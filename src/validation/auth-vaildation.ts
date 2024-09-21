@@ -25,3 +25,4 @@ export class AuthValidation {
     newPassword: z.string().min(8),
   });
 }
+

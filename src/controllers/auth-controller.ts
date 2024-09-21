@@ -49,7 +49,6 @@ export class AuthController {
     } catch (e) {
       next(e);
     }
-  }
 
   async sigInUser(req: Request, res: Response, next: NextFunction) {
     try {
