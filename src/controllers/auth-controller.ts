@@ -131,8 +131,20 @@ export class AuthController {
 
   async getRefreshToken(req: Request, res: Response, next: NextFunction) {
     try {
-      const { ecm_app_AT } = req.cookies;
-      const { email, id } = verifyRefreshToken(ecm_app_AT);
+      const { ecm_app_RT } = req.cookies;
+      const { email, id, role } = verifyRefreshToken(ecm_app_RT);
+      const { accessToken, refreshToken } = generateAuthToken({
+        email,
+        id,
+        role,
+      });
+      await AuthService.getRefreshToken(id, email);
+      await AuthService.saveRefreshToken(refreshToken, id);
+      await AuthService.sendAuthToken(accessToken, refreshToken, res);
+      res.status(201).json({
+        status: "success",
+        message: "success created new refresh token",
+      });
     } catch (e) {
       next(e);
     }

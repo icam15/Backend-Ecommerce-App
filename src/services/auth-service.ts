@@ -274,6 +274,21 @@ export class AuthService {
   }
 
   static async getRefreshToken(userId: number, email: string) {
-    // findUser
+    const existUser = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        email,
+      },
+      include: { userToken: true },
+    });
+    if (!existUser) {
+      throw new ResponseError(400, "account not found");
+    }
+    if (existUser.isVerified === "UNVERIFIED") {
+      throw new ResponseError(400, "account was not verified");
+    }
+    if (dayjs(existUser.userToken?.refreshToken).isBefore(dayjs())) {
+      throw new ResponseError(400, "token expired");
+    }
   }
 }
