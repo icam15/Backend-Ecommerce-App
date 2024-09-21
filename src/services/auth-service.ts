@@ -237,4 +237,6 @@ export class AuthService {
 
     return { email: existsUser.email };
   }
+
+  static async getUserSession(userId: number) {}
 }
