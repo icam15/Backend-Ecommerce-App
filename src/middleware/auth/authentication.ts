@@ -1,5 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import { ResponseError } from "../../helpers/response-error";
+import * as jwt from "jsonwebtoken";
+import { AuthJwtPayload } from "../../types/auth-types";
+import { logger } from "../../libs/logger";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user: AuthJwtPayload;
+    }
+  }
+}
 
 export const authenticationUser = (
   req: Request,
@@ -7,11 +18,28 @@ export const authenticationUser = (
   next: NextFunction
 ) => {
   try {
-  } catch (e) {
-    // get accessToken form cookie
+    // get accessToken from cookie
     const accessToken = req.cookies.ecm_app_AT;
-    if (!accessToken) {
+    logger.debug(accessToken);
+    if (accessToken === undefined || null) {
       throw new ResponseError(401, "unAuthorization");
     }
+    jwt.verify(
+      accessToken,
+      process.env.JWT_ACCESS_SECRET!,
+      { complete: true },
+      function (
+        err: jwt.VerifyErrors | undefined | any,
+        decoded: AuthJwtPayload | undefined | any
+      ) {
+        if (err instanceof jwt.TokenExpiredError) {
+          throw new ResponseError(403, "token was expired");
+        }
+        req.user = decoded.payload as AuthJwtPayload;
+      }
+    );
+    next();
+  } catch (e) {
+    next(e);
   }
 };

@@ -1,3 +1,4 @@
+import { authenticationUser } from "../middleware/auth/authentication";
 import { AuthController } from "./../controllers/auth-controller";
 import { Router } from "express";
 
@@ -16,6 +17,11 @@ export class AuthRouter {
     this.router.post("/sign-in", this.authController.sigInUser);
     this.router.post("/forgot-password", this.authController.forgotPassword);
     this.router.post("/reset-password", this.authController.resetPassword);
+    this.router.get(
+      "/session",
+      authenticationUser,
+      this.authController.getUserSession
+    );
   }
 
   getRouter(): Router {

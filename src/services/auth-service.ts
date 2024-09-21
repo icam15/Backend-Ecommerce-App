@@ -237,4 +237,18 @@ export class AuthService {
 
     return { email: existsUser.email };
   }
+
+  static async getUserSession(userId: number, email: string) {
+    const findUser = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        email,
+      },
+      include: { userToken: true },
+    });
+    if (!findUser) {
+      throw new ResponseError(400, "account not found");
+    }
+    return findUser;
+  }
 }

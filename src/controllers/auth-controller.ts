@@ -49,6 +49,7 @@ export class AuthController {
     } catch (e) {
       next(e);
     }
+  }
 
   async sigInUser(req: Request, res: Response, next: NextFunction) {
     try {
@@ -103,7 +104,23 @@ export class AuthController {
     }
   }
 
-  async getUserSession() {}
+  async getUserSession(req: Request, res: Response, next: NextFunction) {
+    try {
+      const session = req.user;
+      const result = await AuthService.getUserSession(
+        session.id,
+        session.email
+      );
+      res.status(200).json({
+        status: "success",
+        message: "Get session success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
   async getRefreshToken() {}
 
   async signUpUserWithGoogle() {}
