@@ -72,7 +72,7 @@ export class AuthService {
 
   static async verifyAccount(
     token: string
-  ): Promise<{ userId: number; email: string }> {
+  ): Promise<{ userId: number; email: string; role: string }> {
     // get expired and email from decode the token
     const { expiredAt, email } = verifyVericationToken(token);
 
@@ -104,7 +104,11 @@ export class AuthService {
       },
     });
 
-    return { email: existUser!.email, userId: existUser!.id };
+    return {
+      email: existUser!.email,
+      userId: existUser!.id,
+      role: existUser.role,
+    };
   }
 
   static async sendAuthToken(
@@ -131,7 +135,7 @@ export class AuthService {
 
   static async signInUser(
     payload: SignInUserPayload
-  ): Promise<{ email: string; userId: number }> {
+  ): Promise<{ email: string; userId: number; role: string }> {
     // check user exist
     const existUser = await prisma.user.findUnique({
       where: {
@@ -155,7 +159,11 @@ export class AuthService {
       throw new ResponseError(400, "email or password are wrong");
     }
 
-    return { email: existUser.email, userId: existUser.id };
+    return {
+      email: existUser.email,
+      userId: existUser.id,
+      role: existUser.role,
+    };
   }
 
   static async forgotPassword(
@@ -250,5 +258,37 @@ export class AuthService {
       throw new ResponseError(400, "account not found");
     }
     return findUser;
+  }
+
+  static async saveRefreshToken(refreshToken: string, userId: number) {
+    const expiredToken = dayjs().add(1, "day").toDate();
+    await prisma.userToken.update({
+      where: {
+        userId,
+      },
+      data: {
+        refreshToken,
+        refreshToken_exp: expiredToken,
+      },
+    });
+  }
+
+  static async getRefreshToken(userId: number, email: string) {
+    const existUser = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        email,
+      },
+      include: { userToken: true },
+    });
+    if (!existUser) {
+      throw new ResponseError(400, "account not found");
+    }
+    if (existUser.isVerified === "UNVERIFIED") {
+      throw new ResponseError(400, "account was not verified");
+    }
+    if (dayjs(existUser.userToken?.refreshToken).isBefore(dayjs())) {
+      throw new ResponseError(400, "token expired");
+    }
   }
 }
