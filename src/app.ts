@@ -21,8 +21,8 @@ export class App {
     this.handleError();
   }
   private configuration() {
-    this.app.use(express.json());
     this.app.use(cookieParser());
+    this.app.use(express.json());
     // this.app.get("/test", (req: Request, res: Response, next: NextFunction) => {
     //   res.send("Test successfully");
     // });
