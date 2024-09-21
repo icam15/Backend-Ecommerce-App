@@ -2,10 +2,11 @@ import cookieParser from "cookie-parser";
 import { config } from "dotenv";
 import { errorMiddleware } from "./middleware/error-middleware";
 import { RootRouter } from "./routers";
+import express from "express";
 
 config();
 export class App {
-  private app: Express;
+  private app;
   private PORT = process.env.PORT;
   constructor() {
     this.app = express();

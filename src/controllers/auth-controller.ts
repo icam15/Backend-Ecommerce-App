@@ -10,7 +10,10 @@ import {
   verifyAccountPayload,
 } from "../types/auth-types";
 import { logger } from "../libs/logger";
-import { generateAuthToken } from "../utils/token/auth-token";
+import {
+  generateAuthToken,
+  verifyRefreshToken,
+} from "../utils/token/auth-token";
 
 export class AuthController {
   async signUpUser(req: Request, res: Response, next: NextFunction) {
@@ -35,10 +38,13 @@ export class AuthController {
         AuthValidation.verifyAccountValidation,
         req.body as verifyAccountPayload
       );
-      const { email, userId } = await AuthService.verifyAccount(payload.token);
+      const { email, userId, role } = await AuthService.verifyAccount(
+        payload.token
+      );
       const { accessToken, refreshToken } = generateAuthToken({
         email,
         id: userId,
+        role,
       });
       logger.info(accessToken, refreshToken);
       await AuthService.sendAuthToken(accessToken, refreshToken, res);
@@ -57,10 +63,11 @@ export class AuthController {
         AuthValidation.signInUserValidation,
         req.body as SignUpUserPayload
       );
-      const { email, userId } = await AuthService.signInUser(payload);
+      const { email, userId, role } = await AuthService.signInUser(payload);
       const { accessToken, refreshToken } = generateAuthToken({
         email,
         id: userId,
+        role,
       });
       await AuthService.sendAuthToken(accessToken, refreshToken, res);
       res.status(201).json({
@@ -121,7 +128,14 @@ export class AuthController {
     }
   }
 
-  async getRefreshToken() {}
+  async getRefreshToken(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { ecm_app_AT } = req.cookies;
+      const { email, id } = verifyRefreshToken(ecm_app_AT);
+    } catch (e) {
+      next(e);
+    }
+  }
 
   async signUpUserWithGoogle() {}
   async redirectGoogleOauth() {}

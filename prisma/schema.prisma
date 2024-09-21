@@ -46,7 +46,11 @@ model UserToken{
   userId Int @unique @map("user_id")
   verifyToken String? @map("verify_token")
   resetPasswordToken String? @map("reset_password_token")
+  refreshToken String? @map("refresh_token")
+  refreshToken_exp DateTime
 
   //Relation 
   user User @relation(fields: [userId], references: [id])
 }
+
+

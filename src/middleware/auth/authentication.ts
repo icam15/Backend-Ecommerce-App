@@ -35,6 +35,7 @@ export const authenticationUser = (
         if (err instanceof jwt.TokenExpiredError) {
           throw new ResponseError(403, "token was expired");
         }
+        res.locals.session = decoded.payload as AuthJwtPayload;
         req.user = decoded.payload as AuthJwtPayload;
       }
     );

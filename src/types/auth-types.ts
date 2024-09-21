@@ -16,6 +16,7 @@ export type verifyAccountPayload = {
 export type AuthJwtPayload = {
   id: number;
   email: string;
+  role: string;
 };
 
 export type ForgotPasswordPayload = {
