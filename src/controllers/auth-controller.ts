@@ -4,6 +4,8 @@ import { validate } from "../validation/validation";
 import { AuthValidation } from "../validation/auth-vaildation";
 import {
   AuthJwtPayload,
+  ForgotPasswordPayload,
+  ResetPasswordPayload,
   SignUpUserPayload,
   verifyAccountPayload,
 } from "../types/auth-types";
@@ -20,7 +22,7 @@ export class AuthController {
       const { email } = await AuthService.signUpUser(payload);
       res.status(201).json({
         status: "success",
-        message: `User created, verifcation code was send to ${email}`,
+        message: `User created, verifcation link was send to ${email}`,
       });
     } catch (e) {
       next(e);
@@ -47,13 +49,64 @@ export class AuthController {
     } catch (e) {
       next(e);
     }
+
+  async sigInUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const payload = validate(
+        AuthValidation.signInUserValidation,
+        req.body as SignUpUserPayload
+      );
+      const { email, userId } = await AuthService.signInUser(payload);
+      const { accessToken, refreshToken } = generateAuthToken({
+        email,
+        id: userId,
+      });
+      await AuthService.sendAuthToken(accessToken, refreshToken, res);
+      res.status(201).json({
+        status: "success",
+        message: "logged in succesfully",
+      });
+    } catch (e) {
+      next(e);
+    }
   }
 
-  async sigInUser() {}
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const payload = validate(
+        AuthValidation.forgotPasswordValidation,
+        req.body as ForgotPasswordPayload
+      );
+      const { email } = await AuthService.forgotPassword(payload);
+      res.status(201).json({
+        status: "success",
+        message: `reset password link was send to ${email}`,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const payload = validate(
+        AuthValidation.resetPasswordValidation,
+        req.body as ResetPasswordPayload
+      );
+      await AuthService.resetPassword(payload);
+      res.status(201).json({
+        status: "success",
+        message: "new password was success created",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async getUserSession() {}
+  async getRefreshToken() {}
+
   async signUpUserWithGoogle() {}
   async redirectGoogleOauth() {}
-  async forgotPassword() {}
-  async getRefreshToken() {}
-  async getUserSession() {}
   async logoutUser() {}
 }

@@ -17,3 +17,12 @@ export type AuthJwtPayload = {
   id: number;
   email: string;
 };
+
+export type ForgotPasswordPayload = {
+  email: string;
+};
+
+export type ResetPasswordPayload = {
+  resetToken: string;
+  newPassword: string;
+};

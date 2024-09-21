@@ -9,6 +9,7 @@ const envSchema = z.object({
   VERIFY_ACCOUNT_SECRET: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
+  RESET_PASSWORD_SECRET: z.string(),
 });
 
 declare global {
