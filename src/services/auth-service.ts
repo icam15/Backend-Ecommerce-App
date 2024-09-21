@@ -1,12 +1,16 @@
 import { ResponseError } from "../helpers/response-error";
 import { prisma } from "../libs/prisma";
-import { SignInUserPayload, SignUpUserPayload } from "../types/auth-types";
+import {
+  ForgotPasswordPayload,
+  SignInUserPayload,
+  SignUpUserPayload,
+} from "../types/auth-types";
 import dayjs from "dayjs";
 import {
   generateVerifyAccountToken,
   verifyToken,
 } from "../utils/token/verify-token";
-import { hashPassword } from "../helpers/bcrypt";
+import { comparePassword, hashPassword } from "../helpers/bcrypt";
 import { sendVerifyAccountLink } from "../utils/emails/email";
 import { Response } from "express";
 import { logger } from "../libs/logger";
@@ -119,5 +123,49 @@ export class AuthService {
       sameSite: "none",
       path: "/",
     });
+  }
+
+  static async signInUser(
+    payload: SignInUserPayload
+  ): Promise<{ email: string; userId: number }> {
+    // check user exist
+    const existUser = await prisma.user.findUnique({
+      where: {
+        email: payload.email,
+      },
+      include: { userToken: true },
+    });
+    if (!existUser) {
+      throw new ResponseError(400, "account not found");
+    }
+    if (existUser.isVerified === "UNVERIFIED") {
+      throw new ResponseError(400, "account was not verified");
+    }
+
+    // compare hashed password in db
+    const isPasswordValid = await comparePassword(
+      payload.password,
+      existUser?.password!
+    );
+    if (!isPasswordValid) {
+      throw new ResponseError(400, "email or password are wrong");
+    }
+
+    return { email: existUser.email, userId: existUser.id };
+  }
+
+  static async forgotPassword(
+    payload: ForgotPasswordPayload
+  ): Promise<{ email: string }> {
+    // check exist user
+    const existUser = await prisma.user.findUnique({
+      where: {
+        email: payload.email,
+      },
+      include:{userToken:true}
+    });
+    if (!existUser) throw new ResponseError(400, "account not found");
+    if(existUser)
+    // send token reset password and the expired
   }
 }

@@ -10,4 +10,9 @@ export class AuthValidation {
   static readonly verifyAccountValidation = z.object({
     token: z.string(),
   });
+
+  static readonly signInUserValidation = z.object({
+    email: z.string().email(),
+    password: z.string().min(8),
+  });
 }

@@ -49,10 +49,31 @@ export class AuthController {
     }
   }
 
-  async sigInUser() {}
+  async sigInUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const payload = validate(
+        AuthValidation.signInUserValidation,
+        req.body as SignUpUserPayload
+      );
+      const { email, userId } = await AuthService.signInUser(payload);
+      const { accessToken, refreshToken } = generateAuthToken({
+        email,
+        id: userId,
+      });
+      await AuthService.sendAuthToken(accessToken, refreshToken, res);
+      res.status(201).json({
+        status: "success",
+        message: "logged in succesfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
   async signUpUserWithGoogle() {}
   async redirectGoogleOauth() {}
   async forgotPassword() {}
+  async resetPassword() {}
   async getRefreshToken() {}
   async getUserSession() {}
   async logoutUser() {}
