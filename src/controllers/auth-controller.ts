@@ -46,7 +46,7 @@ export class AuthController {
         id: userId,
         role,
       });
-      logger.info(accessToken, refreshToken);
+      await AuthService.saveRefreshToken(refreshToken, userId);
       await AuthService.sendAuthToken(accessToken, refreshToken, res);
       res.status(201).json({
         status: "success",
@@ -69,6 +69,7 @@ export class AuthController {
         id: userId,
         role,
       });
+      await AuthService.saveRefreshToken(refreshToken, userId);
       await AuthService.sendAuthToken(accessToken, refreshToken, res);
       res.status(201).json({
         status: "success",

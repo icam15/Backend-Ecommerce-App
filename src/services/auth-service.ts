@@ -260,6 +260,19 @@ export class AuthService {
     return findUser;
   }
 
+  static async saveRefreshToken(refreshToken: string, userId: number) {
+    const expiredToken = dayjs().add(1, "day").toDate();
+    await prisma.userToken.update({
+      where: {
+        userId,
+      },
+      data: {
+        refreshToken,
+        refreshToken_exp: expiredToken,
+      },
+    });
+  }
+
   static async getRefreshToken(userId: number, email: string) {
     // findUser
   }

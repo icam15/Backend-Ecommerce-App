@@ -47,7 +47,7 @@ model UserToken{
   verifyToken String? @map("verify_token")
   resetPasswordToken String? @map("reset_password_token")
   refreshToken String? @map("refresh_token")
-  refreshToken_exp DateTime
+  refreshToken_exp DateTime?
 
   //Relation 
   user User @relation(fields: [userId], references: [id])
