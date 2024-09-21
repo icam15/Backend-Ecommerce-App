@@ -21,3 +21,8 @@ export type AuthJwtPayload = {
 export type ForgotPasswordPayload = {
   email: string;
 };
+
+export type ResetPasswordPayload = {
+  resetToken: string;
+  newPassword: string;
+};

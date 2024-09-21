@@ -2,16 +2,22 @@ import { ResponseError } from "../helpers/response-error";
 import { prisma } from "../libs/prisma";
 import {
   ForgotPasswordPayload,
+  ResetPasswordPayload,
   SignInUserPayload,
   SignUpUserPayload,
 } from "../types/auth-types";
 import dayjs from "dayjs";
 import {
+  generateResetPasswordToken,
   generateVerifyAccountToken,
-  verifyToken,
+  verifyResetPasswordToken,
+  verifyVericationToken,
 } from "../utils/token/verify-token";
 import { comparePassword, hashPassword } from "../helpers/bcrypt";
-import { sendVerifyAccountLink } from "../utils/emails/email";
+import {
+  sendResetPasswordLink,
+  sendVerifyAccountLink,
+} from "../utils/emails/email";
 import { Response } from "express";
 import { logger } from "../libs/logger";
 
@@ -68,7 +74,7 @@ export class AuthService {
     token: string
   ): Promise<{ userId: number; email: string }> {
     // get expired and email from decode the token
-    const { expiredAt, email } = verifyToken(token);
+    const { expiredAt, email } = verifyVericationToken(token);
 
     // check the user in database by the email and the expired
     const existUser = await prisma.user.findUnique({
@@ -80,8 +86,6 @@ export class AuthService {
     if (!existUser || !existUser.userToken) {
       throw new ResponseError(403, "account or token not found");
     }
-    logger.info(existUser);
-    console.log(existUser);
     if (dayjs(expiredAt).isBefore(dayjs())) {
       throw new ResponseError(400, "Token expired");
     }
@@ -162,10 +166,75 @@ export class AuthService {
       where: {
         email: payload.email,
       },
-      include:{userToken:true}
     });
+
     if (!existUser) throw new ResponseError(400, "account not found");
-    if(existUser)
-    // send token reset password and the expired
+    if (existUser.isVerified === "UNVERIFIED") {
+      throw new ResponseError(400, "account was not verified");
+    }
+
+    // create token reset password and the expired
+    const expiredToken = dayjs().add(1, "hour").toDate();
+    const { token } = generateResetPasswordToken({
+      email: existUser.email,
+      expiredAt: expiredToken,
+      userId: existUser.id,
+    });
+
+    // attach reset token to user
+    await prisma.userToken.update({
+      where: {
+        userId: existUser.id,
+      },
+      data: {
+        resetPasswordToken: token,
+      },
+    });
+
+    // send reset password link to user
+    sendResetPasswordLink(token, existUser.email);
+
+    return { email: existUser.email };
+  }
+
+  static async resetPassword(
+    payload: ResetPasswordPayload
+  ): Promise<{ email: string }> {
+    // verify reset token
+    const { email, userId, expiredAt } = verifyResetPasswordToken(
+      payload.resetToken
+    );
+    if (dayjs(expiredAt).isBefore(dayjs())) {
+      throw new ResponseError(400, "token was expired");
+    }
+
+    // check exist user
+    const existsUser = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        email,
+        userToken: { resetPasswordToken: payload.resetToken },
+      },
+    });
+    if (!existsUser) {
+      throw new ResponseError(400, "account not found");
+    }
+    if (existsUser.isVerified === "UNVERIFIED") {
+      throw new ResponseError(400, "account was not verified");
+    }
+
+    // create new user password
+    const hashedPassword = await hashPassword(payload.newPassword);
+    await prisma.user.update({
+      where: {
+        id: userId,
+        email,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    return { email: existsUser.email };
   }
 }
