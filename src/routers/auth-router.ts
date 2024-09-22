@@ -23,6 +23,16 @@ export class AuthRouter {
       this.authController.getUserSession
     );
     this.router.get("/refresh-token", this.authController.getRefreshToken);
+    this.router.get(
+      "/logout",
+      authenticationUser,
+      this.authController.logoutUser
+    );
+    this.router.get("/google", this.authController.signUpWithGoogle);
+    this.router.get(
+      "/google/callback",
+      this.authController.callbackGoogleOauth
+    );
   }
 
   getRouter(): Router {

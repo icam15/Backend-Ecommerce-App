@@ -20,6 +20,8 @@ import {
 } from "../utils/emails/email";
 import { Response } from "express";
 import { logger } from "../libs/logger";
+import { oauth2, oauth2Client } from "../libs/oauth2/googleClient";
+import { generateAuthToken } from "../utils/token/auth-token";
 
 export class AuthService {
   static async signUpUser(
@@ -273,7 +275,11 @@ export class AuthService {
     });
   }
 
-  static async getRefreshToken(userId: number, email: string) {
+  static async getRefreshToken(
+    userId: number,
+    email: string
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    // check valid user
     const existUser = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -290,5 +296,54 @@ export class AuthService {
     if (dayjs(existUser.userToken?.refreshToken).isBefore(dayjs())) {
       throw new ResponseError(400, "token expired");
     }
+    // generate new auth token
+    const { accessToken, refreshToken } = generateAuthToken({
+      email: existUser.email,
+      id: existUser.id,
+      role: existUser.role,
+    });
+
+    return { accessToken, refreshToken };
+  }
+
+  static async logout(userId: number) {
+    await prisma.userToken.update({
+      where: {
+        userId,
+      },
+      data: {
+        refreshToken: "",
+        refreshToken_exp: undefined,
+      },
+    });
+  }
+
+  static async handleSignUpWithGoogle(code: string) {
+    // set oauth credentials
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    // get data user google
+    const { data } = await oauth2.userinfo.get();
+
+    // check exist user
+    let findUser = await prisma.user.findUnique({
+      where: {
+        email: data.email!,
+      },
+    });
+    const hashedPassword = await hashPassword(data.name!);
+    if (!findUser) {
+      findUser = await prisma.user.create({
+        data: {
+          email: data.email!,
+          displayName: data.given_name!,
+          imageUrl: data.picture!,
+          password: hashedPassword,
+          userToken: { create: {} },
+        },
+      });
+    }
+    return { email: findUser.email, userId: findUser.id, role: findUser.role };
   }
 }
