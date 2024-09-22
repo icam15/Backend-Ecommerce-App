@@ -21,6 +21,7 @@ import {
 import { Response } from "express";
 import { logger } from "../libs/logger";
 import { oauth2, oauth2Client } from "../libs/oauth2/googleClient";
+import { generateAuthToken } from "../utils/token/auth-token";
 
 export class AuthService {
   static async signUpUser(
@@ -274,7 +275,11 @@ export class AuthService {
     });
   }
 
-  static async getRefreshToken(userId: number, email: string) {
+  static async getRefreshToken(
+    userId: number,
+    email: string
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    // check valid user
     const existUser = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -291,6 +296,14 @@ export class AuthService {
     if (dayjs(existUser.userToken?.refreshToken).isBefore(dayjs())) {
       throw new ResponseError(400, "token expired");
     }
+    // generate new auth token
+    const { accessToken, refreshToken } = generateAuthToken({
+      email: existUser.email,
+      id: existUser.id,
+      role: existUser.role,
+    });
+
+    return { accessToken, refreshToken };
   }
 
   static async logout(userId: number) {

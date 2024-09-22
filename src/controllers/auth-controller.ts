@@ -134,12 +134,10 @@ export class AuthController {
     try {
       const { ecm_app_RT } = req.cookies;
       const { email, id, role } = verifyRefreshToken(ecm_app_RT);
-      const { accessToken, refreshToken } = generateAuthToken({
-        email,
+      const { accessToken, refreshToken } = await AuthService.getRefreshToken(
         id,
-        role,
-      });
-      await AuthService.getRefreshToken(id, email);
+        email
+      );
       await AuthService.saveRefreshToken(refreshToken, id);
       await AuthService.sendAuthToken(accessToken, refreshToken, res);
       res.status(201).json({
