@@ -32,7 +32,7 @@ model User{
   role UserRole @default(CUSTOMER)
   displayName String @map("dispaly_name") @db.VarChar(12)
   isVerified UserStatus @default(UNVERIFIED)
-  phoneNumber Int? @map("phone_number")
+  phoneNumber String? @map("phone_number")
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt 
 
