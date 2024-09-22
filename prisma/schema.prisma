@@ -38,6 +38,9 @@ model User{
 
   //Relation
   userToken UserToken?
+  address Address[]
+
+  @@map("user")
 
 }
 
@@ -51,6 +54,27 @@ model UserToken{
 
   //Relation 
   user User @relation(fields: [userId], references: [id])
+
+  @@map("user_token")
 }
 
+model Address {
+  id Int @id @default(autoincrement())
+  userId Int @unique @map("user_id")
+  address String @db.Text
+  phone String @map("home_phone")
+  note String @db.Text
+  isMainAddress Boolean @default(false)
+  postalCode String @map("postal_code")
+  city String 
+  province String
+  longitude Float
+  latitude Float
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
 
+  // Relation
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("address")
+}
