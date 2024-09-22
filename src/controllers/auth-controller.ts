@@ -14,6 +14,7 @@ import {
   generateAuthToken,
   verifyRefreshToken,
 } from "../utils/token/auth-token";
+import { oauthUrl } from "../libs/oauth2/googleClient";
 
 export class AuthController {
   async signUpUser(req: Request, res: Response, next: NextFunction) {
@@ -165,6 +166,37 @@ export class AuthController {
     }
   }
 
-  async signUpUserWithGoogle() {}
-  async redirectGoogleOauth() {}
+  async signUpWithGoogle(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.status(301).redirect(oauthUrl);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async callbackGoogleOauth(
+    req: Request<{}, {}, {}, { code: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { code } = req.query;
+      const { email, role, userId } = await AuthService.handleSignUpWithGoogle(
+        code
+      );
+      const { accessToken, refreshToken } = generateAuthToken({
+        email,
+        role,
+        id: userId,
+      });
+      await AuthService.sendAuthToken(accessToken, refreshToken, res);
+      await AuthService.saveRefreshToken(refreshToken, userId);
+      res.status(201).json({
+        status: "success",
+        message: "sign up with google is success",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

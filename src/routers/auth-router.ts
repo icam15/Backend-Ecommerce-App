@@ -28,6 +28,11 @@ export class AuthRouter {
       authenticationUser,
       this.authController.logoutUser
     );
+    this.router.get("/google", this.authController.signUpWithGoogle);
+    this.router.get(
+      "/google/callback",
+      this.authController.callbackGoogleOauth
+    );
   }
 
   getRouter(): Router {
