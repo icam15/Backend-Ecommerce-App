@@ -24,6 +24,11 @@ enum UserStatus {
   UNVERIFIED
 }
 
+enum CityType {
+  KABUPATEN
+  KOTA
+}
+
 model User{
   id Int @id @default(autoincrement())
   email String @unique
@@ -45,7 +50,7 @@ model User{
 }
 
 model UserToken{
-  id Int @unique @default(autoincrement())
+  id Int @id @default(autoincrement())
   userId Int @unique @map("user_id")
   verifyToken String? @map("verify_token")
   resetPasswordToken String? @map("reset_password_token")
@@ -65,9 +70,9 @@ model Address {
   phone String @map("home_phone")
   note String @db.Text
   isMainAddress Boolean @default(false)
-  postalCode String @map("postal_code")
-  city String 
-  province String
+  postalCode String @map("postal_code") 
+  cityId Int @unique
+  provinceId Int @unique
   longitude Float
   latitude Float
   createAt DateTime @default(now())
@@ -75,6 +80,29 @@ model Address {
 
   // Relation
   user User @relation(fields: [userId], references: [id])
+  province Province @relation(fields: [provinceId], references: [id])
+  city City @relation(fields: [cityId], references: [id])
 
   @@map("address")
+}
+
+model City {
+  id Int @id @default(autoincrement())
+  name String
+  cityType CityType @map("city_type")
+  provinceId Int @unique
+
+
+  // Relation
+  province Province @relation(fields: [provinceId], references: [id])
+  address Address[]
+}
+
+model Province {
+  id Int @id @default(autoincrement())
+  name String
+
+  // Relation
+  city City[]
+  address Address[]
 }
