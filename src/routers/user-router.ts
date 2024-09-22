@@ -12,6 +12,7 @@ export class UserRouter {
 
   private initializeRouter(): void {
     this.router.get("/", this.userController.getUser);
+    this.router.patch("/", this.userController.updateUser);
   }
 
   getRouter(): Router {
