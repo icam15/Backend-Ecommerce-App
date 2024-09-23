@@ -1,9 +1,10 @@
-
+import { hashPassword } from "../helpers/bcrypt";
 import { ResponseError } from "../helpers/response-error";
 import { prisma } from "../libs/prisma";
-import { UpdateUserPayload } from "../types/user-types";
+import { ChangePasswordPayload, UpdateUserPayload } from "../types/user-types";
 
 export class UserService {
+  // get user from database
   static async getUserByid(userId: number) {
     const user = await prisma.user.findUnique({
       where: {
@@ -20,7 +21,6 @@ export class UserService {
 
   static async UpdateUserById(userId: number, payload: UpdateUserPayload) {
     // check exist display name
-
     if (payload.displayName) {
       const existDisplayName = await prisma.user.findFirst({
         where: {
@@ -44,6 +44,7 @@ export class UserService {
     // if (existDisplayName) {
     //   throw new ResponseError(400, "display name used by another user");
     // }
+
     // update user
     const user = await prisma.user.update({
       where: {
@@ -58,6 +59,20 @@ export class UserService {
     return user;
   }
 
-  static async createUserAddress(userId: number) {}
-}
+  static async changePassword(userId: number, payload: ChangePasswordPayload) {
+    // hash new password
+    const newHashedPassword = await hashPassword(payload.newPassword);
+    // update user with the password
+    const user = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: newHashedPassword,
+      },
+    });
+    return user;
+  }
 
+  static async UploadImageUser() {}
+}

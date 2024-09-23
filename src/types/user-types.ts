@@ -3,4 +3,6 @@ export type UpdateUserPayload = {
   phoneNumber?: string;
 };
 
-export type CreateUserAddressPayload = {};
+export type ChangePasswordPayload = {
+  newPassword: string;
+};

@@ -1,4 +1,5 @@
 
+import { ChangePasswordPayload } from "./../types/user-types";
 import { NextFunction, Request, Response } from "express";
 import { UserService } from "../services/user-service";
 import { validate } from "../validation/validation";
@@ -37,4 +38,24 @@ export class UserController {
       next(e);
     }
   }
+
+  async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const session = req.user;
+      const payload = validate(
+        UserValidation.changePasswordPayload,
+        req.body as ChangePasswordPayload
+      );
+      const result = await UserService.changePassword(session.id, payload);
+      res.status(201).json({
+        status: "success",
+        message: "change password was success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async uploadImageUser() {}
 }
