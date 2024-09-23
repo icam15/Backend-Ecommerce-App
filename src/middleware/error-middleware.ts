@@ -23,6 +23,8 @@ export const errorMiddleware = async (
     res.status(500).json({
       status: "error",
       message: err.message,
+      name: err.name,
+      stack: err.stack,
     });
   }
 };

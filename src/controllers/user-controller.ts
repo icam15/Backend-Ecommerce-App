@@ -4,6 +4,10 @@ import { UserService } from "../services/user-service";
 import { validate } from "../validation/validation";
 import { UserValidation } from "../validation/user-validation";
 import { UpdateUserPayload } from "../types/user-types";
+import { decode } from "base64-arraybuffer";
+import { logger } from "../libs/logger";
+import { uploadFileToBucket } from "../utils/supabase";
+import { supabase } from "../libs/supabase";
 
 export class UserController {
   async getUser(req: Request, res: Response, next: NextFunction) {
@@ -58,8 +62,12 @@ export class UserController {
 
   async uploadImageUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const image = req.file;
-      res.send(image);
+      const file = req.file;
+      const fileType = decode(file?.buffer.toString("base64")!);
+      const { data, error } = await supabase.storage
+        .from("avatar")
+        .upload(file?.filename!, fileType);
+      res.status(201).json(data);
     } catch (e) {
       next(e);
     }
