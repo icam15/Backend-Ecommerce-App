@@ -1,4 +1,3 @@
-
 import { ChangePasswordPayload } from "./../types/user-types";
 import { NextFunction, Request, Response } from "express";
 import { UserService } from "../services/user-service";
@@ -57,5 +56,12 @@ export class UserController {
     }
   }
 
-  async uploadImageUser() {}
+  async uploadImageUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const image = req.file;
+      res.send(image);
+    } catch (e) {
+      next(e);
+    }
+  }
 }

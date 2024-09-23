@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { UserController } from "../controllers/user-controller";
+import { uploadFile } from "../utils/multer";
 
 export class UserRouter {
   private router: Router;
@@ -13,6 +14,12 @@ export class UserRouter {
   private initializeRouter(): void {
     this.router.get("/", this.userController.getUser);
     this.router.patch("/", this.userController.updateUser);
+    this.router.patch("/change-password");
+    this.router.post(
+      "/image",
+      uploadFile.single("file"),
+      this.userController.uploadImageUser
+    );
   }
 
   getRouter(): Router {
