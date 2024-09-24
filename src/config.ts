@@ -13,6 +13,8 @@ const envSchema = z.object({
   REDIRECT_GOOGLE_OAUTH_URL: z.string(),
   SUPABASE_URL: z.string(),
   SUPABASE_KEY: z.string(),
+  RAJA_ONGKIR_API_KEY: z.string(),
+  RAJA_ONGKIR_BASE_URL: z.string(),
 });
 
 declare global {
