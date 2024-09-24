@@ -18,7 +18,7 @@ export class UserRouter {
     this.router.post(
       "/image",
       uploadFile.single("file"),
-      this.userController.uploadImageUser
+      this.userController.updateImage
     );
   }
 

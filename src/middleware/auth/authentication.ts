@@ -20,7 +20,6 @@ export const authenticationUser = (
   try {
     // get accessToken from cookie
     const accessToken = req.cookies.ecm_app_AT;
-    logger.debug(accessToken);
     if (accessToken === undefined || null) {
       throw new ResponseError(401, "unAuthorization");
     }

@@ -4,11 +4,6 @@ import { UserService } from "../services/user-service";
 import { validate } from "../validation/validation";
 import { UserValidation } from "../validation/user-validation";
 import { UpdateUserPayload } from "../types/user-types";
-import { decode } from "base64-arraybuffer";
-import { logger } from "../libs/logger";
-import { uploadFileToBucket } from "../utils/supabase";
-import { supabase } from "../libs/supabase";
-
 export class UserController {
   async getUser(req: Request, res: Response, next: NextFunction) {
     try {
@@ -60,14 +55,15 @@ export class UserController {
     }
   }
 
-  async uploadImageUser(req: Request, res: Response, next: NextFunction) {
+  async updateImage(req: Request, res: Response, next: NextFunction) {
     try {
-      const file = req.file;
-      const fileType = decode(file?.buffer.toString("base64")!);
-      const { data, error } = await supabase.storage
-        .from("avatar")
-        .upload(file?.filename!, fileType);
-      res.status(201).json(data);
+      const image = req.file!;
+      const session = req.user;
+      await UserService.updateImageUser(session.id, image);
+      res.status(201).json({
+        status: "success",
+        message: "update image user is successfully",
+      });
     } catch (e) {
       next(e);
     }
