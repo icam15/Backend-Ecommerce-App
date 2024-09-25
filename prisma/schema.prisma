@@ -87,10 +87,10 @@ model Address {
 }
 
 model City {
-  id Int @id @default(autoincrement())
+  id Int @id 
   name String
   cityType CityType @map("city_type")
-  provinceId Int @unique
+  provinceId Int 
 
 
   // Relation
@@ -99,7 +99,7 @@ model City {
 }
 
 model Province {
-  id Int @id @default(autoincrement())
+  id Int @id 
   name String
 
   // Relation
