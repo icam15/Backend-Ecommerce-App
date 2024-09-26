@@ -120,7 +120,7 @@ export class AddressService {
     });
   }
 
-  static async getUserAddressById(userId: number, addressId: number) {
+  static async getUserAddress(userId: number, addressId: number) {
     // find user address
     const userAddress = await prisma.address.findFirst({
       where: {
@@ -128,6 +128,27 @@ export class AddressService {
         id: addressId,
       },
     });
+    if (!userAddress) {
+      throw new ResponseError(400, "address is not found");
+    }
     return userAddress;
+  }
+
+  static async deleteUserAddress(userId: number, addressId: number) {
+    const findExistAddress = await prisma.address.findFirst({
+      where: {
+        userId,
+        id: addressId,
+      },
+    });
+    if (findExistAddress?.isMainAddress === true) {
+      throw new ResponseError(400, "you cant delete main address");
+    }
+    await prisma.address.delete({
+      where: {
+        userId,
+        id: addressId,
+      },
+    });
   }
 }

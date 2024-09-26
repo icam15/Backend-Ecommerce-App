@@ -82,7 +82,7 @@ export class AddressController {
     try {
       const session = req.user;
       const { addressId } = req.params;
-      const result = await AddressService.getUserAddressById(
+      const result = await AddressService.getUserAddress(
         session.id,
         parseInt(addressId)
       );
@@ -90,6 +90,24 @@ export class AddressController {
         status: "success",
         message: "get user",
         result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async deleteUserAddress(
+    req: Request<{ addressId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { addressId } = req.params;
+      await AddressService.deleteUserAddress(session.id, parseInt(addressId));
+      res.status(201).json({
+        status: "success",
+        message: "delete user address is successfully",
       });
     } catch (e) {
       next(e);
