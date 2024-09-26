@@ -34,21 +34,65 @@ export class AddressController {
     res: Response,
     next: NextFunction
   ) {
-    const { addressId } = req.params;
-    const session = req.user;
-    const payload = validate(
-      AddressValidation.updateUserAddressValidation,
-      req.body as UpdateUserAddressPayload
-    );
-    const result = await AddressService.updateAddress(
-      session.id,
-      parseInt(addressId),
-      payload
-    );
-    res.status(201).json({
-      status: "success",
-      message: "update user address is successfully",
-      result,
-    });
+    try {
+      const { addressId } = req.params;
+      const session = req.user;
+      const payload = validate(
+        AddressValidation.updateUserAddressValidation,
+        req.body as UpdateUserAddressPayload
+      );
+      const result = await AddressService.updateAddress(
+        session.id,
+        parseInt(addressId),
+        payload
+      );
+      res.status(201).json({
+        status: "success",
+        message: "update user address is successfully",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async setMainAddress(
+    req: Request<{ addressId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { addressId } = req.params;
+      await AddressService.setMainUserAddress(session.id, parseInt(addressId));
+      res.status(201).json({
+        status: "success",
+        message: "update address to main addres is succesfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async getUserAddress(
+    req: Request<{ addressId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { addressId } = req.params;
+      const result = await AddressService.getUserAddressById(
+        session.id,
+        parseInt(addressId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "get user",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
   }
 }
