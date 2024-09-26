@@ -16,6 +16,7 @@ export class AddressRouter {
       "/main/:addressId",
       this.addressController.setMainAddress
     );
+    this.router.get("/:addressId", this.addressController.getUserAddress);
   }
   getRouter(): Router {
     return this.router;

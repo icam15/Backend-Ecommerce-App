@@ -73,4 +73,26 @@ export class AddressController {
       next(e);
     }
   }
+
+  async getUserAddress(
+    req: Request<{ addressId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { addressId } = req.params;
+      const result = await AddressService.getUserAddressById(
+        session.id,
+        parseInt(addressId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "get user",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

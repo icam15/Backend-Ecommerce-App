@@ -119,4 +119,15 @@ export class AddressService {
       },
     });
   }
+
+  static async getUserAddressById(userId: number, addressId: number) {
+    // find user address
+    const userAddress = await prisma.address.findFirst({
+      where: {
+        userId,
+        id: addressId,
+      },
+    });
+    return userAddress;
+  }
 }
