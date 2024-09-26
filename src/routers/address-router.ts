@@ -11,6 +11,7 @@ export class AddressRouter {
   }
   private initializeRouter(): void {
     this.router.post("/", this.addressController.createAddress);
+    this.router.patch("/:addressId", this.addressController.updateAddress);
   }
   getRouter(): Router {
     return this.router;

@@ -1,7 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { validate } from "../validation/validation";
 import { AddressValidation } from "../validation/address-validation";
-import { CreateUserAddressPayload } from "../types/address-types";
+import {
+  CreateUserAddressPayload,
+  UpdateUserAddressPayload,
+} from "../types/address-types";
 import { AddressService } from "../services/address-service";
 
 export class AddressController {
@@ -24,5 +27,28 @@ export class AddressController {
     } catch (e) {
       next(e);
     }
+  }
+
+  async updateAddress(
+    req: Request<{ addressId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    const { addressId } = req.params;
+    const session = req.user;
+    const payload = validate(
+      AddressValidation.updateUserAddressValidation,
+      req.body as UpdateUserAddressPayload
+    );
+    const result = await AddressService.updateAddress(
+      session.id,
+      parseInt(addressId),
+      payload
+    );
+    res.status(201).json({
+      status: "success",
+      message: "update user address is successfully",
+      result,
+    });
   }
 }
