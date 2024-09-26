@@ -9,7 +9,9 @@ export class AddressRouter {
     this.addressController = new AddressController();
     this.initializeRouter();
   }
-  private initializeRouter(): void {}
+  private initializeRouter(): void {
+    this.router.post("/", this.addressController.createAddress);
+  }
   getRouter(): Router {
     return this.router;
   }

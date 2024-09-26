@@ -65,14 +65,16 @@ model UserToken{
 
 model Address {
   id Int @id @default(autoincrement())
-  userId Int @unique @map("user_id")
+  userId Int @map("user_id")
   address String @db.Text
   phone String @map("home_phone")
   note String @db.Text
   isMainAddress Boolean @default(false)
   postalCode String @map("postal_code") 
-  cityId Int @unique
-  provinceId Int @unique
+  cityName String @map("city_name")
+  cityId Int 
+  provinceName String @map("province_name")
+  provinceId Int 
   longitude Float
   latitude Float
   createAt DateTime @default(now())
