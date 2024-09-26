@@ -113,4 +113,18 @@ export class AddressController {
       next(e);
     }
   }
+
+  async getAllUserAddress(req: Request, res: Response, next: NextFunction) {
+    try {
+      const session = req.user;
+      const result = await AddressService.getAllUserAddress(session.id);
+      res.status(201).json({
+        status: "success",
+        message: "get list of user address is successfully",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

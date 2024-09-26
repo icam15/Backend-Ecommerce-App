@@ -135,6 +135,7 @@ export class AddressService {
   }
 
   static async deleteUserAddress(userId: number, addressId: number) {
+    // find exist user address and check if that is main address
     const findExistAddress = await prisma.address.findFirst({
       where: {
         userId,
@@ -144,11 +145,25 @@ export class AddressService {
     if (findExistAddress?.isMainAddress === true) {
       throw new ResponseError(400, "you cant delete main address");
     }
+    // delete the address
     await prisma.address.delete({
       where: {
         userId,
         id: addressId,
       },
     });
+  }
+
+  static async getAllUserAddress(userId: number) {
+    // find all user address
+    const findUserAddresses = await prisma.address.findMany({
+      where: {
+        userId,
+      },
+    });
+    if (!findUserAddresses) {
+      throw new ResponseError(400, "this user does not have any address");
+    }
+    return findUserAddresses;
   }
 }

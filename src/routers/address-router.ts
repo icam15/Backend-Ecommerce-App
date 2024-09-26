@@ -18,6 +18,7 @@ export class AddressRouter {
     );
     this.router.get("/:addressId", this.addressController.getUserAddress);
     this.router.delete("/:addressId", this.addressController.deleteUserAddress);
+    this.router.get("/", this.addressController.getAllUserAddress);
   }
   getRouter(): Router {
     return this.router;
