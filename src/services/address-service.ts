@@ -35,6 +35,7 @@ export class AddressService {
   }
 
   static async existAddress(userId: number, addressId: number) {
+    // find exist user address
     const findAddress = await prisma.address.findFirst({
       where: {
         userId,
@@ -52,7 +53,9 @@ export class AddressService {
     addressId: number,
     payload: UpdateUserAddressPayload
   ) {
+    // find exist user address
     const existUserAddress = await this.existAddress(userId, addressId);
+    // update exist user address
     const updateAddress = await prisma.address.update({
       where: {
         userId,
@@ -68,5 +71,52 @@ export class AddressService {
       },
     });
     return updateAddress;
+  }
+
+  // static async findMainAddressUser(userId: number) {
+  //   const findMainAddress = await prisma.address.findFirst({
+  //     where: {
+  //       userId,
+  //       isMainAddress: true,
+  //     },
+  //   });
+  //   if (!findMainAddress) {
+  //     throw new ResponseError(400, "this account does not have any address");
+  //   }
+  // }
+
+  static async setMainUserAddress(userId: number, addressId: number) {
+    // find main user address and update to normal address
+    const findMainAddress = await prisma.address.findFirst({
+      where: {
+        userId,
+        isMainAddress: true,
+      },
+    });
+    if (!findMainAddress) {
+      throw new ResponseError(400, "this account does not have any address");
+    }
+
+    await prisma.address.update({
+      where: {
+        userId,
+        isMainAddress: true,
+        id: findMainAddress.id,
+      },
+      data: {
+        isMainAddress: false,
+      },
+    });
+
+    // update the address selected to main address
+    await prisma.address.update({
+      where: {
+        userId,
+        id: addressId,
+      },
+      data: {
+        isMainAddress: true,
+      },
+    });
   }
 }
