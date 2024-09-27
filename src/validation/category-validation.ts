@@ -5,4 +5,9 @@ export class CategoryValidation {
     name: z.string(),
     iconUrl: z.string(),
   });
+
+  static readonly UpdateCategoryValidation = z.object({
+    name: z.string().optional(),
+    iconUrl: z.string().optional(),
+  });
 }

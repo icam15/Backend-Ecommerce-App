@@ -17,6 +17,11 @@ export class CategoryRouter {
       Authorization.ecommerceAdmin,
       this.categoryController.createCategory
     );
+    this.router.patch(
+      "/:categoryId",
+      Authorization.ecommerceAdmin,
+      this.categoryController.updateCategory
+    );
   }
 
   getRouter(): Router {
