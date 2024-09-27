@@ -43,6 +43,8 @@ model User{
 
   //Relation
   userToken UserToken?
+  categories Category[]
+
   address Address[]
 
   @@map("user")
@@ -107,4 +109,17 @@ model Province {
   // Relation
   city City[]
   address Address[]
+}
+
+model Category{
+  id Int @id @default(autoincrement())
+  name String @unique
+  iconUrl String? @map("icon_url")
+  ecommerceAdminId Int @map("ecommerce_admin_id")
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
+
+  // Relation
+  // product Product[]
+  ecommerceAdmin User @relation(fields: [ecommerceAdminId], references: [id])
 }

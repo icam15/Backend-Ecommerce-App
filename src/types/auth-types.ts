@@ -1,3 +1,5 @@
+type UserRole = "CUSTOMER" | "STOREADMIN" | "ECOMMERCEADMIN";
+
 export type SignUpUserPayload = {
   username: string;
   email: string;
@@ -16,7 +18,7 @@ export type verifyAccountPayload = {
 export type AuthJwtPayload = {
   id: number;
   email: string;
-  role: string;
+  role: UserRole | string;
 };
 
 export type ForgotPasswordPayload = {
