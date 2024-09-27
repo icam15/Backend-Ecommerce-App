@@ -21,7 +21,7 @@ export const authenticationUser = (
     // get accessToken from cookie
     const accessToken = req.cookies.ecm_app_AT;
     if (accessToken === undefined || null) {
-      throw new ResponseError(401, "unAuthorization");
+      res.status(403).send("Unauthorization access");
     }
     jwt.verify(
       accessToken,
@@ -32,7 +32,7 @@ export const authenticationUser = (
         decoded: AuthJwtPayload | undefined | any
       ) {
         if (err instanceof jwt.TokenExpiredError) {
-          throw new ResponseError(403, "token was expired");
+          res.status(403).send("Token was expired");
         }
         res.locals.session = decoded.payload as AuthJwtPayload;
         req.user = decoded.payload as AuthJwtPayload;

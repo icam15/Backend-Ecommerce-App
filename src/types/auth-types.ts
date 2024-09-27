@@ -1,3 +1,5 @@
+import { UserRole } from "@prisma/client";
+
 export type SignUpUserPayload = {
   username: string;
   email: string;
@@ -16,7 +18,7 @@ export type verifyAccountPayload = {
 export type AuthJwtPayload = {
   id: number;
   email: string;
-  role: string;
+  role: UserRole;
 };
 
 export type ForgotPasswordPayload = {
