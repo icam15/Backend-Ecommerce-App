@@ -53,7 +53,24 @@ export class CategoryController {
     }
   }
 
-  async deleteCategory(req: Request, res: Response, next: NextFunction) {}
+  async deleteCategory(
+    req: Request<{ categoryId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { categoryId } = req.params;
+      await CategoryService.deleteCategory(session.id, parseInt(categoryId));
+      res.status(201).json({
+        status: "success",
+        message: "delete category is successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
   async getCategoryById(req: Request, res: Response, next: NextFunction) {}
   async getCategories(req: Request, res: Response, next: NextFunction) {}
 }

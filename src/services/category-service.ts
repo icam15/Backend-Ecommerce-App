@@ -34,7 +34,15 @@ export class CategoryService {
     return updateCategory;
   }
 
-  static async deleteCategory() {}
+  static async deleteCategory(userId: number, categoryId: number) {
+    await prisma.category.delete({
+      where: {
+        id: categoryId,
+        ecommerceAdminId: userId,
+      },
+    });
+  }
+
   static async getCategoryById() {}
   static async getCategories() {}
 }
