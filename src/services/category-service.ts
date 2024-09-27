@@ -1,5 +1,8 @@
 import { prisma } from "../libs/prisma";
-import { CreateCategoryPayload } from "../types/category-types";
+import {
+  CreateCategoryPayload,
+  UpdateCategoryPayload,
+} from "../types/category-types";
 
 export class CategoryService {
   static async createCategory(userId: number, payload: CreateCategoryPayload) {
@@ -13,8 +16,25 @@ export class CategoryService {
     return newCategory;
   }
 
+  static async updateCategory(
+    userId: number,
+    categoryId: number,
+    payload: UpdateCategoryPayload
+  ) {
+    const updateCategory = await prisma.category.update({
+      where: {
+        ecommerceAdminId: userId,
+        id: categoryId,
+      },
+      data: {
+        name: payload.name,
+        iconUrl: payload.iconUrl,
+      },
+    });
+    return updateCategory;
+  }
+
   static async deleteCategory() {}
-  static async updateCategory() {}
   static async getCategoryById() {}
   static async getCategories() {}
 }
