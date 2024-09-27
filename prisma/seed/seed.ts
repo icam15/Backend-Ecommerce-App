@@ -2,7 +2,6 @@ import { config } from "dotenv";
 import { CityType, PrismaClient } from "@prisma/client";
 import { listCities } from "../models/cities";
 import { listProvinces } from "../models/province";
-import { error } from "winston";
 config();
 
 type Province = {
@@ -96,7 +95,7 @@ main()
     await prisma.$disconnect();
   })
   .catch(async (e) => {
-    console.log(error);
+    console.log(e);
     await prisma.$disconnect();
     process.exit();
   });

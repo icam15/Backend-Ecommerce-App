@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { CategoryController } from "../controllers/category-controller";
+import { Authorization } from "../middleware/auth/authorization";
 
 export class CategoryRouter {
   private router: Router;
@@ -11,7 +12,11 @@ export class CategoryRouter {
   }
 
   private initializeRouter(): void {
-    this.router.post("/", this.categoryController.createCategory);
+    this.router.post(
+      "/",
+      Authorization.ecommerceAdmin,
+      this.categoryController.createCategory
+    );
   }
 
   getRouter(): Router {
