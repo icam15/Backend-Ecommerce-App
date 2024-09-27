@@ -43,6 +43,14 @@ export class CategoryService {
     });
   }
 
-  static async getCategoryById() {}
+  static async getCategoryById(userId: number, categoryId: number) {
+    const category = await prisma.category.findFirst({
+      where: {
+        id: categoryId,
+        ecommerceAdminId: userId,
+      },
+    });
+  }
+
   static async getCategories() {}
 }
