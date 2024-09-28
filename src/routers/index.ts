@@ -4,6 +4,7 @@ import { UserRouter } from "./user-router";
 import { authenticationUser } from "../middleware/auth/authentication";
 import { AddressRouter } from "./address-router";
 import { CategoryRouter } from "./category-router";
+import { StoreRouter } from "./store-router";
 
 export class RootRouter {
   private router: Router;
@@ -11,12 +12,14 @@ export class RootRouter {
   private userRouter: UserRouter;
   private addressRouter: AddressRouter;
   private categoryRouter: CategoryRouter;
+  private storeRouter: StoreRouter;
   constructor() {
     this.router = Router();
     this.authRouter = new AuthRouter();
     this.userRouter = new UserRouter();
     this.addressRouter = new AddressRouter();
     this.categoryRouter = new CategoryRouter();
+    this.storeRouter = new StoreRouter();
     this.initializeRouter();
   }
   private initializeRouter(): void {
@@ -32,6 +35,7 @@ export class RootRouter {
       authenticationUser,
       this.categoryRouter.getRouter()
     );
+    this.router.use("/store", authenticationUser, this.storeRouter.getRouter());
   }
   getRouter() {
     return this.router;
