@@ -27,11 +27,8 @@ export class CategoryRouter {
       Authorization.ecommerceAdmin,
       this.categoryController.deleteCategory
     );
-    this.router.get(
-      "/:categoryId",
-      Authorization.ecommerceAdmin,
-      this.categoryController.getCategoryById
-    );
+    this.router.get("/:categoryId", this.categoryController.getCategoryById);
+    this.router.get("/", this.categoryController.getCategories);
   }
 
   getRouter(): Router {

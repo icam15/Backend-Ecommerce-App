@@ -1,3 +1,4 @@
+import { logger } from "../libs/logger";
 import { prisma } from "../libs/prisma";
 import {
   CreateCategoryPayload,
@@ -52,5 +53,8 @@ export class CategoryService {
     return category;
   }
 
-  static async getCategories() {}
+  static async getCategories() {
+    const categories = await prisma.category.findMany({});
+    return categories;
+  }
 }

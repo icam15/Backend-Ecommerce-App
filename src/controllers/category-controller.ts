@@ -90,5 +90,17 @@ export class CategoryController {
       next(e);
     }
   }
-  async getCategories(req: Request, res: Response, next: NextFunction) {}
+
+  async getCategories(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await CategoryService.getCategories();
+      res.status(201).json({
+        status: "success",
+        message: "get categories is successfully",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
