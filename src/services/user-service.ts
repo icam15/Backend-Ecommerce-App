@@ -86,7 +86,6 @@ export class UserService {
     const arrayBufferImage = decode(base64Image);
 
     // upload image to bucket
-    console.log(image.mimetype);
     const originalFileName = image.originalname.split(".");
     const fileExt = originalFileName[originalFileName.length - 1].toLowerCase();
     const filePath = `${userId}-${Date.now()}.${fileExt}`;

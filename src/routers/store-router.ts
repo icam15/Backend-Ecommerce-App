@@ -12,10 +12,11 @@ export class StoreRouter {
   }
 
   private initializeRoute(): void {
-    this.router.post(
-      "/",
+    this.router.post("/", this.storeController.createStore);
+    this.router.patch(
+      "/:storeId/image",
       uploadFile.single("file"),
-      this.storeController.createStore
+      this.storeController.updateStoreImage
     );
   }
 

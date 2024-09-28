@@ -22,4 +22,23 @@ export class StoreController {
       next(e);
     }
   }
+
+  async updateStoreImage(
+    req: Request<{ storeId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const image = req.file!;
+      const session = req.user;
+      const { storeId } = req.params;
+      await StoreService.UpdateStoreImage(session.id, parseInt(storeId), image);
+      res.status(201).json({
+        status: "success",
+        message: "update store image is successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
