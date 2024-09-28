@@ -135,11 +135,11 @@ model Category{
 model Store{
   id Int @id @default(autoincrement())
   name String 
-  description String @db.Text
-  imageUrl String @db.Text
+  description String? @db.Text
+  imageUrl String? @db.Text @map("image_url")
   cityName String @map("city_name")
   provinceName String @map("province_name")
-  postalCode String
+  postalCode String? @map("postal_code")
   cityId Int @map("city_id")
   provinceId Int @map("province_id")
   userId Int @map("user_id")
