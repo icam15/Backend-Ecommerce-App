@@ -22,6 +22,13 @@ export class CategoryRouter {
       Authorization.ecommerceAdmin,
       this.categoryController.updateCategory
     );
+    this.router.delete(
+      "/:categoryId",
+      Authorization.ecommerceAdmin,
+      this.categoryController.deleteCategory
+    );
+    this.router.get("/:categoryId", this.categoryController.getCategoryById);
+    this.router.get("/", this.categoryController.getCategories);
   }
 
   getRouter(): Router {

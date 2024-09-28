@@ -53,7 +53,54 @@ export class CategoryController {
     }
   }
 
-  async deleteCategory(req: Request, res: Response, next: NextFunction) {}
-  async getCategoryById(req: Request, res: Response, next: NextFunction) {}
-  async getCategories(req: Request, res: Response, next: NextFunction) {}
+  async deleteCategory(
+    req: Request<{ categoryId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { categoryId } = req.params;
+      await CategoryService.deleteCategory(session.id, parseInt(categoryId));
+      res.status(201).json({
+        status: "success",
+        message: "delete category is successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async getCategoryById(
+    req: Request<{ categoryId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { categoryId } = req.params;
+      const result = await CategoryService.getCategoryById(
+        parseInt(categoryId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "get spesific category is successfully",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async getCategories(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await CategoryService.getCategories();
+      res.status(201).json({
+        status: "success",
+        message: "get categories is successfully",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
