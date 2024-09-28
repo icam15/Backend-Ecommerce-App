@@ -71,6 +71,24 @@ export class CategoryController {
     }
   }
 
-  async getCategoryById(req: Request, res: Response, next: NextFunction) {}
+  async getCategoryById(
+    req: Request<{ categoryId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { categoryId } = req.params;
+      const result = await CategoryService.getCategoryById(
+        parseInt(categoryId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "get spesific category is successfully",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
   async getCategories(req: Request, res: Response, next: NextFunction) {}
 }

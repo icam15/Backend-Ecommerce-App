@@ -30,7 +30,7 @@ export class CategoryRouter {
     this.router.get(
       "/:categoryId",
       Authorization.ecommerceAdmin,
-      this.categoryController.deleteCategory
+      this.categoryController.getCategoryById
     );
   }
 
