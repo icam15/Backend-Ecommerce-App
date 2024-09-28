@@ -57,4 +57,16 @@ export class StoreService {
       },
     });
   }
+
+  static async getStoreById(storeId: number) {
+    const store = await prisma.store.findFirst({
+      where: {
+        id: storeId,
+      },
+    });
+    if (!store) {
+      throw new ResponseError(400, "store not found");
+    }
+    return store;
+  }
 }

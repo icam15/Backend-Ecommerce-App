@@ -18,6 +18,7 @@ export class StoreRouter {
       uploadFile.single("file"),
       this.storeController.updateStoreImage
     );
+    this.router.get("/:storeId", this.storeController.getStore);
   }
 
   getRouter(): Router {

@@ -41,4 +41,22 @@ export class StoreController {
       next(e);
     }
   }
+
+  async getStore(
+    req: Request<{ storeId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { storeId } = req.params;
+      const result = await StoreService.getStoreById(parseInt(storeId));
+      res.status(201).json({
+        status: "success",
+        message: "get store is successfully",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
