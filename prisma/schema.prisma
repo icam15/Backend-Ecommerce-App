@@ -44,8 +44,8 @@ model User{
   //Relation
   userToken UserToken?
   categories Category[]
-
   address Address[]
+  store Store[]
 
   @@map("user")
 
@@ -100,6 +100,9 @@ model City {
   // Relation
   province Province @relation(fields: [provinceId], references: [id])
   address Address[]
+  store Store[]
+
+  @@map("city")
 }
 
 model Province {
@@ -109,6 +112,9 @@ model Province {
   // Relation
   city City[]
   address Address[]
+  store Store[]
+
+  @@map("province")
 }
 
 model Category{
@@ -122,4 +128,28 @@ model Category{
   // Relation
   // product Product[]
   ecommerceAdmin User @relation(fields: [ecommerceAdminId], references: [id])
+
+  @@map("category")
+}
+
+model Store{
+  id Int @id @default(autoincrement())
+  name String 
+  description String @db.Text
+  imageUrl String @db.Text
+  cityName String @map("city_name")
+  provinceName String @map("province_name")
+  postalCode String
+  cityId Int @map("city_id")
+  provinceId Int @map("province_id")
+  userId Int @map("user_id")
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
+
+  // Relation
+  user User @relation(fields: [userId], references: [id])
+  city City @relation(fields: [cityId], references: [id])
+  province Province @relation(fields: [provinceId], references: [id])
+
+  @@map("store")
 }
