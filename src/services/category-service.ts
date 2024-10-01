@@ -1,3 +1,4 @@
+import { ResponseError } from "../helpers/response-error";
 import { prisma } from "../libs/prisma";
 import {
   CreateCategoryPayload,
@@ -49,11 +50,17 @@ export class CategoryService {
         id: categoryId,
       },
     });
+    if (!category) {
+      throw new ResponseError(400, "category not found");
+    }
     return category;
   }
 
   static async getCategories() {
     const categories = await prisma.category.findMany({});
+    if (!categories) {
+      throw new ResponseError(400, "there is no any category");
+    }
     return categories;
   }
 }

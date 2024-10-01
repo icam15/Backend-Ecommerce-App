@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { StoreController } from "../controllers/store-controller";
 import { uploadFile } from "../utils/multer";
+import { Authorization } from "../middleware/auth/authorization";
 
 export class StoreRouter {
   private router: Router;
@@ -13,10 +14,17 @@ export class StoreRouter {
 
   private initializeRoute(): void {
     this.router.post("/", this.storeController.createStore);
+    this.router.get("/:storeId", this.storeController.getStore);
     this.router.patch(
       "/:storeId/image",
+      Authorization.storeAdmin,
       uploadFile.single("file"),
       this.storeController.updateStoreImage
+    );
+    this.router.patch(
+      "/:storeId",
+      Authorization.storeAdmin,
+      this.storeController.updateStore
     );
   }
 
