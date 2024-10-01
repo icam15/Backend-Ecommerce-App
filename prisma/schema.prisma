@@ -45,7 +45,7 @@ model User{
   userToken UserToken?
   categories Category[]
   address Address[]
-  store Store[]
+  store Store?
   storeAdmin StoreAdmin[]
 
   @@map("user")
@@ -143,7 +143,7 @@ model Store{
   postalCode String? @map("postal_code")
   cityId Int @map("city_id")
   provinceId Int @map("province_id")
-  userId Int @map("user_id")
+  userId Int @unique @map("user_id")
   createAt DateTime @default(now()) @map("create_at")
   updateAt DateTime @updatedAt @map("update_at")
 
