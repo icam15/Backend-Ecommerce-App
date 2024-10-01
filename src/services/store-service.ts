@@ -140,4 +140,31 @@ export class StoreService {
       },
     });
   }
+
+  static async deleteStore(userId: number, storeId: number) {
+    // check if the user really own that store
+    const isOwnerStore = await prisma.store.findUnique({
+      where: {
+        userId,
+        id: storeId,
+      },
+    });
+    if (!isOwnerStore) {
+      throw new ResponseError(400, "your does not own this store");
+    }
+    // delete store admins
+    await prisma.storeAdmin.deleteMany({
+      where: {
+        storeId,
+      },
+    });
+
+    // delete the store
+    await prisma.store.delete({
+      where: {
+        id: storeId,
+        userId,
+      },
+    });
+  }
 }

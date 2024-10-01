@@ -81,4 +81,21 @@ export class StoreController {
       next(e);
     }
   }
+  async deleteStore(
+    req: Request<{ storeId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { storeId } = req.params;
+      const session = req.user;
+      await StoreService.deleteStore(session.id, parseInt(storeId));
+      res.status(201).json({
+        status: "success",
+        message: "delete store is successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
