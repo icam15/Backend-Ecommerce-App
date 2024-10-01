@@ -1,7 +1,5 @@
 // export type UserRole = "CUSTOMER" | "STOREADMIN" | "ECOMMERCEADMIN";
 
-import { UserRole } from "@prisma/client";
-
 // enum UserRole {
 //   "CUSTOMER",
 //   "STOREADMIN",

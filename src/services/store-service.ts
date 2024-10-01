@@ -7,9 +7,6 @@ import { logger } from "../libs/logger";
 
 export class StoreService {
   static async createStore(userId: number, payload: CreateStorePayload) {
-    // let url;
-    // if (image !== null) {
-
     // create new store
     const newStore = await prisma.store.create({
       data: {
@@ -21,6 +18,17 @@ export class StoreService {
         provinceId: payload.provinceId,
         postalCode: payload.postalCode!,
         userId,
+      },
+    });
+
+    // update user to be a admin
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        role: "STOREADMIN",
+        storeAdmin: { create: { storeId: newStore.id } },
       },
     });
     return newStore;
