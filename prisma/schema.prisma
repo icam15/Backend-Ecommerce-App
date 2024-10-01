@@ -42,6 +42,7 @@ model User{
   updateAt DateTime @updatedAt 
 
   //Relation
+  storeAdmin StoreAdmin[]
   userToken UserToken?
   categories Category[]
   address Address[]
