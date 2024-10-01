@@ -46,10 +46,6 @@ model User{
   categories Category[]
   address Address[]
   store Store?
-  storeAdmin StoreAdmin[]
-
-  @@map("user")
-
 }
 
 model UserToken{

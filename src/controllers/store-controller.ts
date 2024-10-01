@@ -81,7 +81,6 @@ export class StoreController {
       next(e);
     }
   }
-
   async deleteStore(
     req: Request<{ storeId: string }>,
     res: Response,
