@@ -59,4 +59,11 @@ export class StoreController {
       next(e);
     }
   }
+
+  async updateStore(req: Request<{}>, res: Response, next: NextFunction) {
+    try {
+    } catch (e) {
+      next(e);
+    }
+  }
 }

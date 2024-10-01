@@ -46,6 +46,7 @@ model User{
   categories Category[]
   address Address[]
   store Store[]
+  storeAdmin StoreAdmin[]
 
   @@map("user")
 
@@ -150,6 +151,21 @@ model Store{
   user User @relation(fields: [userId], references: [id])
   city City @relation(fields: [cityId], references: [id])
   province Province @relation(fields: [provinceId], references: [id])
+  storeAdmin StoreAdmin[]
 
   @@map("store")
+}
+
+model StoreAdmin {
+  id Int @id @default(autoincrement())
+  userId Int 
+  storeId Int
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@map("store_admin")
+
+  // Relation
+  user User @relation(fields: [userId], references: [id])
+  store Store @relation(fields: [storeId], references: [id])
 }

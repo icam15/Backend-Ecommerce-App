@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 export class Authorization {
   public static storeAdmin(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = req.user;
     } catch (e) {
       next(e);
     }

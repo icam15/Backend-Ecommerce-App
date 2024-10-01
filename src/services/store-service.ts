@@ -1,6 +1,6 @@
 import { decode } from "base64-arraybuffer";
 import { prisma } from "../libs/prisma";
-import { CreateStorePayload } from "../types/store-types";
+import { CreateStorePayload, UpdateStorePayload } from "../types/store-types";
 import { getUrlImageFromBucket, uploadImageToBucket } from "../utils/supabase";
 import { ResponseError } from "../helpers/response-error";
 import { logger } from "../libs/logger";
@@ -69,4 +69,12 @@ export class StoreService {
     }
     return store;
   }
+
+  static async findStoreAdmin() {}
+
+  static async updateStore(
+    userId: number,
+    storeId: number,
+    payload: UpdateStorePayload
+  ) {}
 }
