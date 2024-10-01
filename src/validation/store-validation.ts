@@ -10,4 +10,14 @@ export class StoreValidation {
     cityId: z.number(),
     provinceId: z.number(),
   });
+
+  static readonly updateStoreValidation = z.object({
+    name: z.string().max(20).optional(),
+    description: z.string().optional(),
+    cityName: z.string().optional(),
+    provinceName: z.string().optional(),
+    postalCode: z.string().optional(),
+    cityId: z.number().optional(),
+    provinceId: z.number().optional(),
+  });
 }

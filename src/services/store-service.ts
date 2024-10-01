@@ -26,6 +26,31 @@ export class StoreService {
     return newStore;
   }
 
+  static async findStoreAdmin(userId: number, storeId: number) {
+    const findAdmin = await prisma.storeAdmin.findFirst({
+      where: {
+        userId,
+        storeId,
+      },
+    });
+    if (!findAdmin) {
+      throw new ResponseError(400, "you are not allowed to update this");
+    }
+    return findAdmin;
+  }
+
+  static async findStore(storeId: number) {
+    const findStore = await prisma.store.findUnique({
+      where: {
+        id: storeId,
+      },
+    });
+    if (!findStore) {
+      throw new ResponseError(404, "store not found");
+    }
+    return findStore;
+  }
+
   static async UpdateStoreImage(
     userId: number,
     storeId: number,
@@ -70,11 +95,41 @@ export class StoreService {
     return store;
   }
 
-  static async findStoreAdmin() {}
-
   static async updateStore(
     userId: number,
     storeId: number,
     payload: UpdateStorePayload
-  ) {}
+  ) {
+    const {
+      cityId,
+      cityName,
+      description,
+      name,
+      postalCode,
+      provinceId,
+      provinceName,
+    } = payload;
+
+    // find exist store admin
+    await this.findStoreAdmin(userId, storeId);
+
+    // find exist store
+    const existStore = await this.findStore(storeId);
+
+    // update the store
+    await prisma.store.update({
+      where: {
+        id: storeId,
+      },
+      data: {
+        name: name ? name : existStore.name,
+        description: description ? description : existStore.description,
+        cityId: cityId ? cityId : existStore.cityId,
+        cityName: cityName ? cityName : existStore.cityName,
+        postalCode: postalCode ? postalCode : existStore.postalCode,
+        provinceId: provinceId ? provinceId : existStore.provinceId,
+        provinceName: provinceName ? provinceName : existStore.provinceName,
+      },
+    });
+  }
 }

@@ -1,4 +1,12 @@
-type UserRole = "CUSTOMER" | "STOREADMIN" | "ECOMMERCEADMIN";
+// export type UserRole = "CUSTOMER" | "STOREADMIN" | "ECOMMERCEADMIN";
+
+import { UserRole } from "@prisma/client";
+
+// enum UserRole {
+//   "CUSTOMER",
+//   "STOREADMIN",
+//   "ECOMMERCEADMIN",
+// }
 
 export type SignUpUserPayload = {
   username: string;
@@ -18,7 +26,7 @@ export type verifyAccountPayload = {
 export type AuthJwtPayload = {
   id: number;
   email: string;
-  role: UserRole | string;
+  role: string;
 };
 
 export type ForgotPasswordPayload = {

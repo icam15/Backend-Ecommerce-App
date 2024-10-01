@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { validate } from "../validation/validation";
 import { StoreValidation } from "../validation/store-validation";
 import { StoreService } from "../services/store-service";
-import { CreateStorePayload } from "../types/store-types";
+import { CreateStorePayload, UpdateStorePayload } from "../types/store-types";
 
 export class StoreController {
   async createStore(req: Request, res: Response, next: NextFunction) {
@@ -60,8 +60,23 @@ export class StoreController {
     }
   }
 
-  async updateStore(req: Request<{}>, res: Response, next: NextFunction) {
+  async updateStore(
+    req: Request<{ storeId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
+      const payload = validate(
+        StoreValidation.createStoreValidation,
+        req.body as UpdateStorePayload
+      );
+      const session = req.user;
+      const { storeId } = req.params;
+      await StoreService.updateStore(session.id, parseInt(storeId), payload);
+      res.status(201).json({
+        status: "success",
+        message: "update store is successfully",
+      });
     } catch (e) {
       next(e);
     }
