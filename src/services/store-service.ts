@@ -3,6 +3,7 @@ import { prisma } from "../libs/prisma";
 import {
   AddStoreAdminPayload,
   CreateStorePayload,
+  DeleteStoreAdminPayload,
   UpdateStorePayload,
 } from "../types/store-types";
 import { getUrlImageFromBucket, uploadImageToBucket } from "../utils/supabase";
@@ -201,7 +202,7 @@ export class StoreService {
       },
     });
     if (existAdmin) {
-      throw new ResponseError(400, "user already be a admin");
+      throw new ResponseError(400, "user already be an admin");
     }
 
     // update role new Admin and create new store admin
@@ -233,9 +234,26 @@ export class StoreService {
     await this.isOwnerStore(userId, storeId);
 
     // check exist admin
-    // const existAdmin =
+    const existAdminInTheStore = await prisma.storeAdmin.findFirst({
+      where: {
+        userId: adminId,
+        storeId,
+      },
+    });
+    if (!existAdminInTheStore) {
+      throw new ResponseError(400, "user is not an admin");
+    }
 
     // delete admin from the store and update role admin
+    await prisma.user.update({
+      where: {
+        id: adminId,
+      },
+      data: {
+        role: "CUSTOMER",
+        storeAdmin: { delete: { id: existAdminInTheStore.id } },
+      },
+    });
   }
 
   static async getStoreAdminByid(

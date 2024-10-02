@@ -5,6 +5,7 @@ import { StoreService } from "../services/store-service";
 import {
   AddStoreAdminPayload,
   CreateStorePayload,
+  DeleteStoreAdminPayload,
   UpdateStorePayload,
 } from "../types/store-types";
 
@@ -112,13 +113,35 @@ export class StoreController {
       const { storeId } = req.params;
       const session = req.user;
       const payload = validate(
-        StoreValidation.addStoreValidation,
+        StoreValidation.addStoreAdminValidation,
         req.body as AddStoreAdminPayload
       );
       await StoreService.addStoreAdmin(session.id, parseInt(storeId), payload);
       res.status(201).json({
         status: "success",
         message: "add new store admin is successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async deleteStoreAdmin(
+    req: Request<{ storeId: string; adminId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { storeId, adminId } = req.params;
+      await StoreService.deleteStoreAdmin(
+        session.id,
+        parseInt(storeId),
+        parseInt(adminId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "delete admin store is successfully",
       });
     } catch (e) {
       next(e);
