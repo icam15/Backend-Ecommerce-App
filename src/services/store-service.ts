@@ -34,7 +34,19 @@ export class StoreService {
     return newStore;
   }
 
-  static async findStoreAdmin(userId: number, storeId: number) {
+  static async isOwnerStore(userId: number, storeId: number) {
+    const ownerStore = await prisma.store.findUnique({
+      where: {
+        id: storeId,
+        userId,
+      },
+    });
+    if (!ownerStore) {
+      throw new ResponseError(400, "you are not own this store");
+    }
+  }
+
+  static async isStoreAdmin(userId: number, storeId: number) {
     const findAdmin = await prisma.storeAdmin.findFirst({
       where: {
         userId,
@@ -64,6 +76,8 @@ export class StoreService {
     storeId: number,
     image: Express.Multer.File
   ) {
+    await this.isStoreAdmin(userId, storeId);
+
     // decode file buffer to string base64 encoding and then decode base 64 to arrayBuffer
     const base64Image = image.buffer.toString("base64");
     const arrayBufferImage = decode(base64Image);
@@ -119,7 +133,7 @@ export class StoreService {
     } = payload;
 
     // find exist store admin
-    await this.findStoreAdmin(userId, storeId);
+    await this.isStoreAdmin(userId, storeId);
 
     // find exist store
     const existStore = await this.findStore(storeId);
@@ -166,5 +180,39 @@ export class StoreService {
         userId,
       },
     });
+  }
+
+  static async addStoreAdmin(
+    userId: number,
+    storeId: number,
+    newAdminId: number
+  ) {
+    // check if the user own the store
+    // check if the new admin id already be a admin on the store
+    // add new admin to the store
+  }
+
+  static async deleteStoreAdmin(
+    userId: number,
+    storeId: number,
+    adminId: number
+  ) {
+    // check if the user own the store
+    // check exist admin
+    // delete admin from the store
+  }
+
+  static async getStoreAdminByid(
+    userId: number,
+    storeId: number,
+    adminId: number
+  ) {
+    // check if the user own the store
+    // get all store admin
+  }
+
+  static async getStoreAdmins(userId: number, storeId: number) {
+    // check if the user own the store
+    // get all store admins
   }
 }
