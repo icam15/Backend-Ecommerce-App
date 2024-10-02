@@ -36,8 +36,12 @@ export class StoreRouter {
       Authorization.storeAdmin,
       this.storeController.addStoreAdmin
     );
-
-  getRouter(): Router {
+    this.router.delete(
+      "/:storeId/admin/:adminId",
+      Authorization.storeAdmin,
+      this.storeController.deleteStoreAdmin
+    );
+  }
     return this.router;
   }
 }

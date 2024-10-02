@@ -21,3 +21,7 @@ export type UpdateStorePayload = {
 export type AddStoreAdminPayload = {
   newAdminId: number;
 };
+
+export type DeleteStoreAdminPayload = {
+  adminId: number;
+};

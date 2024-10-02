@@ -3,6 +3,7 @@ import { prisma } from "../libs/prisma";
 import {
   AddStoreAdminPayload,
   CreateStorePayload,
+  DeleteStoreAdminPayload,
   UpdateStorePayload,
 } from "../types/store-types";
 import { getUrlImageFromBucket, uploadImageToBucket } from "../utils/supabase";
@@ -194,34 +195,34 @@ export class StoreService {
     // check if the user own the store
     await this.isOwnerStore(userId, storeId);
 
-    // check if the new admin id already be a admin on the store
+    // check if the new admin id already be a admin
     const existAdmin = await prisma.storeAdmin.findFirst({
       where: {
         userId: payload.newAdminId,
-        storeId,
       },
     });
     if (existAdmin) {
-      throw new ResponseError(400, "user already be a admin");
+      throw new ResponseError(400, "user already be an admin");
     }
 
-    // update role new Admin
+    // update role new Admin and create new store admin
     await prisma.user.update({
       where: {
         id: payload.newAdminId,
       },
       data: {
         role: "STOREADMIN",
+        storeAdmin: { create: { storeId } },
       },
     });
 
-    // add new admin to the store
-    await prisma.storeAdmin.create({
-      data: {
-        storeId,
-        userId: payload.newAdminId,
-      },
-    });
+    // // add new admin to the store and update
+    // await prisma.storeAdmin.create({
+    //   data: {
+    //     storeId,
+    //     userId: payload.newAdminId,
+    //   },
+    // });
   }
 
   static async deleteStoreAdmin(
@@ -233,8 +234,26 @@ export class StoreService {
     await this.isOwnerStore(userId, storeId);
 
     // check exist admin
+    const existAdminInTheStore = await prisma.storeAdmin.findFirst({
+      where: {
+        userId: adminId,
+        storeId,
+      },
+    });
+    if (!existAdminInTheStore) {
+      throw new ResponseError(400, "user is not an admin");
+    }
 
-    // delete admin from the store
+    // delete admin from the store and update role admin
+    await prisma.user.update({
+      where: {
+        id: adminId,
+      },
+      data: {
+        role: "CUSTOMER",
+        storeAdmin: { delete: { id: existAdminInTheStore.id } },
+      },
+    });
   }
 
   static async getStoreAdminByid(
@@ -250,3 +269,4 @@ export class StoreService {
     // check if the user own the store
     // get all store admins
   }
+}

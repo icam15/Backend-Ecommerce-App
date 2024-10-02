@@ -21,7 +21,11 @@ export class StoreValidation {
     provinceId: z.number().optional(),
   });
 
-  static readonly addStoreValidation = z.object({
+  static readonly addStoreAdminValidation = z.object({
     newAdminId: z.number(),
+  });
+
+  static readonly deleteStoreAdminValidation = z.object({
+    adminId: z.number(),
   });
 }
