@@ -42,8 +42,6 @@ export class StoreRouter {
       this.storeController.deleteStoreAdmin
     );
   }
-
-  getRouter(): Router {
     return this.router;
   }
 }
