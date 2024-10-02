@@ -282,7 +282,19 @@ export class StoreService {
   }
 
   static async getStoreAdmins(userId: number, storeId: number) {
-    // check if the user own the store
+    // check if the user is admin of the store
+    await this.isStoreAdmin(userId, storeId);
+
     // get all store admins
+    const findAdmins = await prisma.storeAdmin.findMany({
+      where: {
+        storeId,
+      },
+      include: { user: true },
+    });
+    if (!findAdmins) {
+      throw new ResponseError(400, "cant found any admin of the store");
+    }
+    return findAdmins;
   }
 }
