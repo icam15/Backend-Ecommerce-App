@@ -20,4 +20,8 @@ export class StoreValidation {
     cityId: z.number().optional(),
     provinceId: z.number().optional(),
   });
+
+  static readonly addStoreValidation = z.object({
+    newAdminId: z.number(),
+  });
 }
