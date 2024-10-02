@@ -147,4 +147,49 @@ export class StoreController {
       next(e);
     }
   }
+
+  async getStoreAdmin(
+    req: Request<{ storeId: string; adminId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { adminId, storeId } = req.params;
+      const session = req.user;
+      const result = await StoreService.getStoreAdminByid(
+        session.id,
+        parseInt(storeId),
+        parseInt(adminId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "get admin store is successfully",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async getStoreAdmins(
+    req: Request<{ storeId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { storeId } = req.params;
+      const result = await StoreService.getStoreAdmins(
+        session.id,
+        parseInt(storeId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "get all admin store is successfully",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
