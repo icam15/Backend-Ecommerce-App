@@ -1,6 +1,10 @@
 import { decode } from "base64-arraybuffer";
 import { prisma } from "../libs/prisma";
-import { CreateStorePayload, UpdateStorePayload } from "../types/store-types";
+import {
+  AddStoreAdminPayload,
+  CreateStorePayload,
+  UpdateStorePayload,
+} from "../types/store-types";
 import { getUrlImageFromBucket, uploadImageToBucket } from "../utils/supabase";
 import { ResponseError } from "../helpers/response-error";
 import { logger } from "../libs/logger";
@@ -185,11 +189,39 @@ export class StoreService {
   static async addStoreAdmin(
     userId: number,
     storeId: number,
-    newAdminId: number
+    payload: AddStoreAdminPayload
   ) {
     // check if the user own the store
+    await this.isOwnerStore(userId, storeId);
+
     // check if the new admin id already be a admin on the store
+    const existAdmin = await prisma.storeAdmin.findFirst({
+      where: {
+        userId: payload.newAdminId,
+        storeId,
+      },
+    });
+    if (existAdmin) {
+      throw new ResponseError(400, "user already be a admin");
+    }
+
+    // update role new Admin
+    await prisma.user.update({
+      where: {
+        id: payload.newAdminId,
+      },
+      data: {
+        role: "STOREADMIN",
+      },
+    });
+
     // add new admin to the store
+    await prisma.storeAdmin.create({
+      data: {
+        storeId,
+        userId: payload.newAdminId,
+      },
+    });
   }
 
   static async deleteStoreAdmin(
@@ -198,7 +230,10 @@ export class StoreService {
     adminId: number
   ) {
     // check if the user own the store
+    await this.isOwnerStore(userId, storeId);
+
     // check exist admin
+
     // delete admin from the store
   }
 
@@ -208,7 +243,7 @@ export class StoreService {
     adminId: number
   ) {
     // check if the user own the store
-    // get all store admin
+    // get store admin
   }
 
   static async getStoreAdmins(userId: number, storeId: number) {

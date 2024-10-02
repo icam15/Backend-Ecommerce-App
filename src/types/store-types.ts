@@ -17,3 +17,7 @@ export type UpdateStorePayload = {
   cityId?: number;
   provinceId?: number;
 };
+
+export type AddStoreAdminPayload = {
+  newAdminId: number;
+};
