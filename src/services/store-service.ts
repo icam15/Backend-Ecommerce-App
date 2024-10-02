@@ -261,8 +261,24 @@ export class StoreService {
     storeId: number,
     adminId: number
   ) {
-    // check if the user own the store
+    // check if the user is admin of the store
+    const adminStore = await this.isStoreAdmin(userId, storeId);
+    if (!adminStore) {
+      throw new ResponseError(400, "you does not allowed for this resources");
+    }
+
     // get store admin
+    const findAdmin = await prisma.storeAdmin.findFirst({
+      where: {
+        userId: adminId,
+        storeId,
+      },
+      include: { user: true },
+    });
+    if (!findAdmin) {
+      throw new ResponseError(400, "admin not found");
+    }
+    return findAdmin;
   }
 
   static async getStoreAdmins(userId: number, storeId: number) {
