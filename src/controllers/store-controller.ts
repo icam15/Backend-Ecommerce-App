@@ -102,8 +102,6 @@ export class StoreController {
       next(e);
     }
   }
-
-  async addStoreAdmin(
     req: Request<{ storeId: string }>,
     res: Response,
     next: NextFunction

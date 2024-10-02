@@ -36,7 +36,6 @@ export class StoreRouter {
       Authorization.storeAdmin,
       this.storeController.addStoreAdmin
     );
-  }
 
   getRouter(): Router {
     return this.router;

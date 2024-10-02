@@ -250,4 +250,3 @@ export class StoreService {
     // check if the user own the store
     // get all store admins
   }
-}
