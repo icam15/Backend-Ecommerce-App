@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { ProductController } from "../controllers/product-controller";
 import { Authorization } from "../middleware/auth/authorization";
+import { uploadFile } from "../utils/multer";
 
 export class ProductRouter {
   private router: Router;
@@ -15,6 +16,7 @@ export class ProductRouter {
     this.router.post(
       "/",
       Authorization.storeAdmin,
+      uploadFile.array("file", 3),
       this.productController.createProduct
     );
   }

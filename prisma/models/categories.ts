@@ -1,4 +1,4 @@
-export function listCategories(id: string) {
+export function listCategories(id: number) {
   return [
     {
       name: "ALL",
