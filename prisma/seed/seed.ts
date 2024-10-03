@@ -1,7 +1,5 @@
 import { config } from "dotenv";
-import { CityType, PrismaClient } from "@prisma/client";
-import { listCities } from "../models/cities";
-import { listProvinces } from "../models/province";
+import { PrismaClient } from "@prisma/client";
 config();
 
 type Province = {
@@ -22,36 +20,11 @@ const prisma = new PrismaClient();
 
 async function main() {
   try {
-    // const listProvince = await listProvinces();
-    // listProvince.map(async (province: Province, index) => {
-    //   return await prisma.province.create({
-    //     data: {
-    //       id: index + 1,
-    //       name: province.name,
-    //     },
-    //   });
-    // });
-
-    // // await prisma.city.create({});
-
-    // const listCity: City[] = await listCities();
-    // listCity.map(async (city: City, index) => {
-    //   return prisma.city.create({
-    //     data: {
-    //       id: index + 1,
-    //       cityType: city.type,
-    //       name: city.name,
-    //       provinceId: city.provinceId,
-    //     },
-    //   });
-    // });
-
-    // Promise.all([listProvince, listCity]);
-
     const rajaOngkirApiKey = process.env.RAJA_ONGKIR_API_KEY!;
     const rajaOngkirBaseUrl = process.env.RAJA_ONGKIR_BASE_URL!;
     const headers = new Headers();
     headers.append("key", rajaOngkirApiKey);
+
     // get list of province
     const getListProvince = await fetch(`${rajaOngkirBaseUrl}/province`, {
       method: "GET",
