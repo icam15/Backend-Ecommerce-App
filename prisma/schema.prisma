@@ -157,6 +157,7 @@ model Store{
   province Province @relation(fields: [provinceId], references: [id])
   storeAdmin StoreAdmin[]
   product Product[]
+  stock Stock[]
 
   @@map("store")
 }
@@ -184,7 +185,7 @@ model Product {
   discountPrice Int @map("discount_price")
   status ProductStatus
   categoryId Int @map("category_id")
-  storeId Int @unique @map("store_id")
+  storeId Int @map("store_id")
   storeEtalaseId Int @map("store_etalase_id")
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
@@ -193,6 +194,8 @@ model Product {
   category Category @relation(fields: [categoryId], references: [id])
   store Store @relation(fields: [storeId], references: [id])
   productImage ProductImage[]
+  stock Stock?
+
   
 
   @@map("product")
@@ -208,3 +211,21 @@ model ProductImage {
 
   @@map("product_image")
 }
+
+model Stock {
+  id Int @id @default(autoincrement())
+  productId Int @unique
+  storeId Int 
+  amount Int @default(0)
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  
+  // Relation
+  product Product @relation(fields: [productId], references: [id])
+  store Store @relation(fields: [storeId], references: [id])
+
+
+  @@map("stock")
+}
+
+
