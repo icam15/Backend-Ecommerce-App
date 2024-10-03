@@ -9,10 +9,9 @@ export class ProductController {
   async createProduct(req: Request, res: Response, next: NextFunction) {
     try {
       const session = req.user;
-      const payload = validate(
-        ProductValidation.createProductValidation,
-        req.body as CreateProductPayload
-      );
+      const payload = validate(ProductValidation.createProductValidation, {
+        ...req.body,
+      } as CreateProductPayload);
       const images = req.files as Express.Multer.File[];
       if (!images) {
         throw new ResponseError(400, "required product image");

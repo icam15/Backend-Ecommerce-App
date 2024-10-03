@@ -11,7 +11,6 @@ const fileFilter = (
   cb: FileFilterCallback
 ) => {
   const extensionFilter = ["png", "jpg", "jpeg"];
-  logger.info(file.mimetype.split("/")[1]);
   const validateExt = extensionFilter.includes(
     file.mimetype.split("/")[1].toLowerCase()
   );
