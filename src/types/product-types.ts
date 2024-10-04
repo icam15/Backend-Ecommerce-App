@@ -6,4 +6,5 @@ export type CreateProductPayload = {
   discountPrice?: string;
   categoryId: number;
   storeEtalaseId?: number;
+  quantity: number;
 };

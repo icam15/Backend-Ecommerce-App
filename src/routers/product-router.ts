@@ -4,7 +4,7 @@ import { Authorization } from "../middleware/auth/authorization";
 import { uploadFile } from "../utils/multer";
 import { convertFieldToInteger } from "./../middleware/convertField-middleware";
 
-const toIntegerFields = ["price", "categoryId"];
+const toIntegerFields = ["price", "categoryId", "quantity"];
 
 export class ProductRouter {
   private router: Router;

@@ -5,7 +5,7 @@ import { decode } from "base64-arraybuffer";
 import { getUrlImageFromBucket, uploadImageToBucket } from "../utils/supabase";
 
 export class ProductService {
-  static async isAdminStore(userId: number) {
+  static async checkAdminStore(userId: number) {
     const adminStore = await prisma.storeAdmin.findFirst({
       where: {
         userId,
@@ -17,13 +17,24 @@ export class ProductService {
     return adminStore;
   }
 
+  static async checkExistProduct(productId: number) {
+    const findProduct = await prisma.product.findUnique({
+      where: {
+        id: productId,
+      },
+    });
+    if (!findProduct) {
+      throw new ResponseError(400, "product not found");
+    }
+  }
+
   static async createProduct(
     userId: number,
     images: Express.Multer.File[],
     payload: CreateProductPayload
   ) {
     // check if valid admin
-    const admin = await this.isAdminStore(userId);
+    const admin = await this.checkAdminStore(userId);
 
     // create new product
     const newProduct = await prisma.product.create({
@@ -35,6 +46,7 @@ export class ProductService {
         categoryId: Number(payload.categoryId),
         storeId: admin.storeId,
         storeEtalaseId: payload.storeEtalaseId,
+        stock: { create: { amount: payload.quantity, storeId: admin.storeId } },
       },
     });
 
