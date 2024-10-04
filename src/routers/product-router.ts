@@ -4,7 +4,13 @@ import { Authorization } from "../middleware/auth/authorization";
 import { uploadFile } from "../utils/multer";
 import { convertFieldToInteger } from "./../middleware/convertField-middleware";
 
-const toIntegerFields = ["price", "categoryId", "quantity"];
+const stringToIntegerFields = [
+  "price",
+  "categoryId",
+  "quantity",
+  "discountPrice",
+  "storeEtalaseId",
+];
 
 export class ProductRouter {
   private router: Router;
@@ -19,9 +25,14 @@ export class ProductRouter {
     this.router.post(
       "/",
       Authorization.storeAdmin,
-      uploadFile.array("images", 10),
-      convertFieldToInteger(toIntegerFields),
+      uploadFile.array("images", 5),
+      convertFieldToInteger(stringToIntegerFields),
       this.productController.createProduct
+    );
+    this.router.patch(
+      "/:productId",
+      Authorization.storeAdmin,
+      this.productController.updateProductData
     );
   }
 
