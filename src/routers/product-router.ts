@@ -26,7 +26,6 @@ export class ProductRouter {
       "/",
       Authorization.storeAdmin,
       uploadFile.array("images"),
-      convertFieldToInteger(stringToIntegerFields),
       this.productController.createProduct
     );
     this.router.patch(

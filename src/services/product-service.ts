@@ -41,7 +41,6 @@ export class ProductService {
   ) {
     // check if valid admin
     const admin = await this.checkAdminStore(userId);
-
     // create new product
     const newProduct = await prisma.product.create({
       data: {
@@ -83,6 +82,7 @@ export class ProductService {
           },
         });
       });
+      
     }
     return newProduct;
   }
