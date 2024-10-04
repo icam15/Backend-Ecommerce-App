@@ -138,7 +138,7 @@ export class ProductService {
     image: Express.Multer.File
   ) {
     // check exist product image
-    const existProductImage = await prisma.productImage.findFirst({
+    const existProductImage = await prisma.productImage.findUnique({
       where: {
         id: imageId,
         productId,
@@ -173,11 +173,24 @@ export class ProductService {
     await prisma.productImage.update({
       where: {
         id: imageId,
-        productId: existProductImage.id,
+        productId,
       },
       data: {
         imageUrl,
       },
     });
+  }
+
+  static async getProductById(productId: number) {
+    const findProduct = await prisma.product.findUnique({
+      where: {
+        id: productId,
+      },
+      include: { productImage: true, stock: true, store: true },
+    });
+    if (!findProduct) {
+      throw new ResponseError(400, "product not found");
+    }
+    return findProduct;
   }
 }

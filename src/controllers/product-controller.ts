@@ -74,13 +74,31 @@ export class ProductController {
       }
       await ProductService.updateProductImage(
         session.id,
-        Number(productId),
-        Number(imageId),
+        parseInt(productId),
+        parseInt(imageId),
         image
       );
       res.status(201).json({
         status: "success",
         message: "update image product successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async getProductById(
+    req: Request<{ productId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { productId } = req.params;
+      const result = await ProductService.getProductById(parseInt(productId));
+      res.status(201).json({
+        status: "success",
+        message: "get product is successfully",
+        result,
       });
     } catch (e) {
       next(e);

@@ -40,6 +40,7 @@ export class ProductRouter {
       Authorization.storeAdmin,
       this.productController.updateProductImage
     );
+    this.router.get("/:productId", this.productController.getProductById);
   }
 
   getRouter(): Router {
