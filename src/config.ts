@@ -6,8 +6,15 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string(),
   DATABASE_URL: z.string(),
   RESEND_API_KEY: z.string(),
+  VERIFY_ACCOUNT_SECRET: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
+  RESET_PASSWORD_SECRET: z.string(),
+  REDIRECT_GOOGLE_OAUTH_URL: z.string(),
+  SUPABASE_URL: z.string(),
+  SUPABASE_KEY: z.string(),
+  RAJA_ONGKIR_API_KEY: z.string(),
+  RAJA_ONGKIR_BASE_URL: z.string(),
 });
 
 declare global {

@@ -19,36 +19,215 @@ enum UserRole {
   CUSTOMER
 }
 
+enum ProductStatus {
+  PUBLISHED
+  INACTIVE
+  SOLDOUT
+}
+
 enum UserStatus {
   VERIFIED
   UNVERIFIED
+}
+
+enum CityType {
+  KABUPATEN
+  KOTA
 }
 
 model User{
   id Int @id @default(autoincrement())
   email String @unique
   password String @db.Text
-  imageUrl String  @map("image_url") @db.Text
+  imageUrl String? @map("image_url") @db.Text
   role UserRole @default(CUSTOMER)
   displayName String @map("dispaly_name") @db.VarChar(12)
   isVerified UserStatus @default(UNVERIFIED)
-  phoneNumber Int @map("phone_number")
+  phoneNumber String? @map("phone_number")
+ 
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt 
 
   //Relation
+  storeAdmin StoreAdmin[]
   userToken UserToken?
-
+  categories Category[]
+  address Address[]
+  store Store?
 }
 
 model UserToken{
-  id Int @unique @default(autoincrement())
+  id Int @id @default(autoincrement())
   userId Int @unique @map("user_id")
-  verifyToken String @map("verify_token")
-  verifyToken_exp DateTime @map("verify_token_exp")
-  resetPasswordToken String @map("reset_password_token")
-  resetPasswordToken_Exp DateTime @map("reset_password_token_exp")
+  verifyToken String? @map("verify_token")
+  resetPasswordToken String? @map("reset_password_token")
+  refreshToken String? @map("refresh_token")
+  refreshToken_exp DateTime?
 
   //Relation 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_token")
 }
+
+model Address {
+  id Int @id @default(autoincrement())
+  userId Int @map("user_id")
+  address String @db.Text
+  phone String @map("home_phone")
+  note String @db.Text
+  isMainAddress Boolean @default(false)
+  postalCode String @map("postal_code") 
+  cityName String @map("city_name")
+  cityId Int 
+  provinceName String @map("province_name")
+  provinceId Int 
+  longitude Float
+  latitude Float
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  // Relation
+  user User @relation(fields: [userId], references: [id])
+  province Province @relation(fields: [provinceId], references: [id])
+  city City @relation(fields: [cityId], references: [id])
+
+  @@map("address")
+}
+
+model City {
+  id Int @id 
+  name String
+  cityType CityType @map("city_type")
+  provinceId Int 
+
+
+  // Relation
+  province Province @relation(fields: [provinceId], references: [id])
+  address Address[]
+  store Store[]
+
+  @@map("city")
+}
+
+model Province {
+  id Int @id 
+  name String
+
+  // Relation
+  city City[]
+  address Address[]
+  store Store[]
+
+  @@map("province")
+}
+
+model Category{
+  id Int @id @default(autoincrement())
+  name String @unique
+  iconUrl String? @map("icon_url")
+  ecommerceAdminId Int @map("ecommerce_admin_id")
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
+
+  // Relation
+  // product Product[]
+  ecommerceAdmin User @relation(fields: [ecommerceAdminId], references: [id])
+  product Product[]
+
+  @@map("category")
+}
+
+model Store{
+  id Int @id @default(autoincrement())
+  name String 
+  description String? @db.Text
+  imageUrl String? @db.Text @map("image_url")
+  cityName String @map("city_name")
+  provinceName String @map("province_name")
+  postalCode String? @map("postal_code")
+  cityId Int @map("city_id")
+  provinceId Int @map("province_id")
+  userId Int @unique @map("user_id")
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
+
+  // Relation
+  user User @relation(fields: [userId], references: [id])
+  city City @relation(fields: [cityId], references: [id])
+  province Province @relation(fields: [provinceId], references: [id])
+  storeAdmin StoreAdmin[]
+  product Product[]
+  stock Stock[]
+
+  @@map("store")
+}
+
+model StoreAdmin {
+  id Int @id @default(autoincrement())
+  userId Int 
+  storeId Int
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@map("store_admin")
+
+  // Relation
+  user User @relation(fields: [userId], references: [id])
+  store Store @relation(fields: [storeId], references: [id] , onDelete: Cascade)
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+  name String 
+  description String? @db.Text
+  weight Float
+  price Int
+  discountPrice Int? @map("discount_price")
+  status ProductStatus
+  categoryId Int @map("category_id")
+  storeId Int @map("store_id")
+  storeEtalaseId Int? @map("store_etalase_id")
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  // Relation
+  category Category @relation(fields: [categoryId], references: [id])
+  store Store @relation(fields: [storeId], references: [id])
+  productImage ProductImage[]
+  stock Stock?
+
+  
+
+  @@map("product")
+}
+
+model ProductImage {
+  id Int @id @default(autoincrement())
+  productId Int
+  imageUrl String @map("image_url")
+
+  // Relation 
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_image")
+}
+
+model Stock {
+  id Int @id @default(autoincrement())
+  productId Int @unique
+  storeId Int 
+  amount Int @default(0)
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  
+  // Relation
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  store Store @relation(fields: [storeId], references: [id])
+
+
+  @@map("stock")
+}
+
+
+
