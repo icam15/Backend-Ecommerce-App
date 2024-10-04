@@ -33,14 +33,12 @@ export class ProductService {
     return findProduct;
   }
 
-  static async createProduct(
     userId: number,
     images: Express.Multer.File[],
     payload: CreateProductPayload
   ) {
     // check if valid admin
     const admin = await this.checkAdminStore(userId);
-
     // create new product
     const newProduct = await prisma.product.create({
       data: {
@@ -50,9 +48,7 @@ export class ProductService {
         weight: Number(payload.weight),
         categoryId: Number(payload.categoryId),
         storeId: admin.storeId,
-        storeEtalaseId: payload.storeEtalaseId,
         stock: { create: { amount: payload.quantity, storeId: admin.storeId } },
-      },
     });
 
     // create new product images
@@ -128,5 +124,6 @@ export class ProductService {
         },
       },
     });
+
   }
 }

@@ -11,7 +11,6 @@ const stringToIntegerFields = [
   "discountPrice",
   "storeEtalaseId",
 ];
-
 export class ProductRouter {
   private router: Router;
   private productController: ProductController;

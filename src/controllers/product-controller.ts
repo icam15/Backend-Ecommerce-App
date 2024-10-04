@@ -7,9 +7,6 @@ import {
   CreateProductPayload,
   UpdateProductPayload,
 } from "../types/product-types";
-
-export class ProductController {
-  async createProduct(req: Request, res: Response, next: NextFunction) {
     try {
       const session = req.user;
       const payload = validate(ProductValidation.createProductValidation, {
