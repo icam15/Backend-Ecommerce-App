@@ -1,11 +1,14 @@
 import { ResponseError } from "./../helpers/response-error";
 import { prisma } from "./../libs/prisma";
-import { CreateProductPayload } from "../types/product-types";
+import {
+  CreateProductPayload,
+  UpdateProductPayload,
+} from "../types/product-types";
 import { decode } from "base64-arraybuffer";
 import { getUrlImageFromBucket, uploadImageToBucket } from "../utils/supabase";
 
 export class ProductService {
-  static async isAdminStore(userId: number) {
+  static async checkAdminStore(userId: number) {
     const adminStore = await prisma.storeAdmin.findFirst({
       where: {
         userId,
@@ -17,14 +20,25 @@ export class ProductService {
     return adminStore;
   }
 
-  static async createProduct(
+  static async checkExistProduct(productId: number) {
+    const findProduct = await prisma.product.findUnique({
+      where: {
+        id: productId,
+      },
+      include: { stock: true },
+    });
+    if (!findProduct) {
+      throw new ResponseError(400, "product not found");
+    }
+    return findProduct;
+  }
+
     userId: number,
     images: Express.Multer.File[],
     payload: CreateProductPayload
   ) {
     // check if valid admin
-    const admin = await this.isAdminStore(userId);
-
+    const admin = await this.checkAdminStore(userId);
     // create new product
     const newProduct = await prisma.product.create({
       data: {
@@ -34,8 +48,7 @@ export class ProductService {
         weight: Number(payload.weight),
         categoryId: Number(payload.categoryId),
         storeId: admin.storeId,
-        storeEtalaseId: payload.storeEtalaseId,
-      },
+        stock: { create: { amount: payload.quantity, storeId: admin.storeId } },
     });
 
     // create new product images
@@ -66,7 +79,51 @@ export class ProductService {
         };
       }
     }
-
     return newProduct;
+  }
+
+  static async updateProductData(
+    userId: number,
+    productId: number,
+    payload: UpdateProductPayload
+  ) {
+    // check  if exist product
+    const existProduct = await this.checkExistProduct(productId);
+
+    // check  if valid admin
+    const adminProduct = await this.checkAdminStore(userId);
+    if (existProduct.storeId !== adminProduct.storeId) {
+      throw new ResponseError(400, "your does not have access of this product");
+    }
+
+    // update product data
+    await prisma.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        name: payload.name ? payload.name : existProduct.name,
+        description: payload.description
+          ? payload.description
+          : existProduct.description,
+        price: payload.price ? payload.price : existProduct.price,
+        discountPrice: payload.discountPrice
+          ? payload.discountPrice
+          : existProduct.discountPrice,
+        status: "PUBLISHED",
+        storeEtalaseId: payload.storeEtalaseId
+          ? payload.storeEtalaseId
+          : existProduct.storeEtalaseId,
+        weight: payload.weight ? payload.weight : existProduct.weight,
+        stock: {
+          update: {
+            amount: payload.quantity
+              ? payload.quantity
+              : existProduct.stock?.amount,
+          },
+        },
+      },
+    });
+
   }
 }

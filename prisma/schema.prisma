@@ -227,3 +227,5 @@ model Stock {
 
   @@map("stock")
 }
+
+

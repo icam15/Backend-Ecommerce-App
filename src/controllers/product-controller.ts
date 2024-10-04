@@ -3,10 +3,10 @@ import { ResponseError } from "../helpers/response-error";
 import { validate } from "../validation/validation";
 import { ProductValidation } from "../validation/product-validation";
 import { ProductService } from "../services/product-service";
-import { CreateProductPayload } from "../types/product-types";
-
-export class ProductController {
-  async createProduct(req: Request, res: Response, next: NextFunction) {
+import {
+  CreateProductPayload,
+  UpdateProductPayload,
+} from "../types/product-types";
     try {
       const session = req.user;
       const payload = validate(ProductValidation.createProductValidation, {
@@ -25,6 +25,32 @@ export class ProductController {
         status: "success",
         message: "create new product is succeesfully",
         result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async updateProductData(
+    req: Request<{ productId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { productId } = req.params;
+      const session = req.user;
+      const payload = validate(
+        ProductValidation.updateProductValidation,
+        req.body as UpdateProductPayload
+      );
+      await ProductService.updateProductData(
+        session.id,
+        Number(productId),
+        payload
+      );
+      res.status(201).json({
+        status: "success",
+        message: "update product data is successfully",
       });
     } catch (e) {
       next(e);
