@@ -25,7 +25,7 @@ export class ProductRouter {
     this.router.post(
       "/",
       Authorization.storeAdmin,
-      uploadFile.array("images", 5),
+      uploadFile.array("images"),
       convertFieldToInteger(stringToIntegerFields),
       this.productController.createProduct
     );
@@ -33,6 +33,12 @@ export class ProductRouter {
       "/:productId",
       Authorization.storeAdmin,
       this.productController.updateProductData
+    );
+    this.router.patch(
+      "/:productId/images/:imageId",
+      uploadFile.single("image"),
+      Authorization.storeAdmin,
+      this.productController.updateProductImage
     );
   }
 

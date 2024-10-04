@@ -59,4 +59,31 @@ export class ProductController {
       next(e);
     }
   }
+
+  async updateProductImage(
+    req: Request<{ productId: string; imageId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { productId, imageId } = req.params;
+      const session = req.user;
+      const image = req.file;
+      if (!image) {
+        throw new ResponseError(400, "required image field");
+      }
+      await ProductService.updateProductImage(
+        session.id,
+        Number(productId),
+        Number(imageId),
+        image
+      );
+      res.status(201).json({
+        status: "success",
+        message: "update image product successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
