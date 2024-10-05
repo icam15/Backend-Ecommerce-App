@@ -44,6 +44,7 @@ model User{
   displayName String @map("dispaly_name") @db.VarChar(12)
   isVerified UserStatus @default(UNVERIFIED)
   phoneNumber String? @map("phone_number")
+ 
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt 
 
@@ -232,5 +233,4 @@ model Stock {
 
   @@map("stock")
 }
-
 
