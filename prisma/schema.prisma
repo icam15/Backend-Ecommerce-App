@@ -19,6 +19,12 @@ enum UserRole {
   CUSTOMER
 }
 
+enum ProductStatus {
+  PUBLISHED
+  INACTIVE
+  SOLDOUT
+}
+
 enum UserStatus {
   VERIFIED
   UNVERIFIED
@@ -38,6 +44,7 @@ model User{
   displayName String @map("dispaly_name") @db.VarChar(12)
   isVerified UserStatus @default(UNVERIFIED)
   phoneNumber String? @map("phone_number")
+ 
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt 
 
@@ -58,7 +65,7 @@ model UserToken{
   refreshToken_exp DateTime?
 
   //Relation 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_token")
 }
@@ -126,6 +133,7 @@ model Category{
   // Relation
   // product Product[]
   ecommerceAdmin User @relation(fields: [ecommerceAdminId], references: [id])
+  product Product[]
 
   @@map("category")
 }
@@ -149,6 +157,9 @@ model Store{
   city City @relation(fields: [cityId], references: [id])
   province Province @relation(fields: [provinceId], references: [id])
   storeAdmin StoreAdmin[]
+  productImage ProductImage[]
+  product Product[]
+  stock Stock[]
 
   @@map("store")
 }
@@ -164,5 +175,62 @@ model StoreAdmin {
 
   // Relation
   user User @relation(fields: [userId], references: [id])
-  store Store @relation(fields: [storeId], references: [id])
+  store Store @relation(fields: [storeId], references: [id] , onDelete: Cascade)
 }
+
+model Product {
+  id Int @id @default(autoincrement())
+  name String 
+  description String? @db.Text
+  weight Float
+  price Int
+  discountPrice Int? @map("discount_price")
+  status ProductStatus
+  categoryId Int @map("category_id")
+  storeId Int @map("store_id")
+  storeEtalaseId Int? @map("store_etalase_id")
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  // Relation
+  category Category @relation(fields: [categoryId], references: [id])
+  store Store @relation(fields: [storeId], references: [id])
+  productImage ProductImage[]
+  stock Stock?
+
+  
+
+  @@map("product")
+}
+
+model ProductImage {
+  id Int @id @default(autoincrement())
+  productId Int
+  imageUrl String @map("image_url")
+  storeId Int
+  createAt DateTime @default(now())
+  updaeteAt DateTime @updatedAt
+
+  // Relation 
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  store Store @relation(fields: [storeId], references: [id], onDelete:Cascade)
+
+  @@map("product_image")
+}
+
+model Stock {
+  id Int @id @default(autoincrement())
+  productId Int @unique
+  storeId Int 
+  amount Int @default(0)
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  
+  // Relation
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  store Store @relation(fields: [storeId], references: [id])
+
+
+  @@map("stock")
+}
+

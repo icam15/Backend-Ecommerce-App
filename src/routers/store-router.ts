@@ -52,6 +52,7 @@ export class StoreRouter {
       this.storeController.getStoreAdmins
     );
   }
+  getRouter(): Router {
     return this.router;
   }
 }
