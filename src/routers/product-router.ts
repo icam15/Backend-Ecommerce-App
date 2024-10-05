@@ -26,6 +26,7 @@ export class ProductRouter {
       "/",
       Authorization.storeAdmin,
       uploadFile.array("images"),
+      convertFieldToInteger(stringToIntegerFields),
       this.productController.createProduct
     );
     this.router.patch(
@@ -38,6 +39,17 @@ export class ProductRouter {
       uploadFile.single("image"),
       Authorization.storeAdmin,
       this.productController.updateProductImage
+    );
+    this.router.get("/:productId", this.productController.getProductById);
+    this.router.delete(
+      "/:productId",
+      Authorization.storeAdmin,
+      this.productController.deleteProduct
+    );
+    this.router.patch(
+      "/:productId/set-inActive",
+      Authorization.storeAdmin,
+      this.productController.setProductToInActive
     );
   }
 

@@ -158,6 +158,8 @@ model Store{
   province Province @relation(fields: [provinceId], references: [id])
   storeAdmin StoreAdmin[]
   productImage ProductImage[]
+  product Product[]
+  stock Stock[]
 
   @@map("store")
 }
@@ -231,6 +233,4 @@ model Stock {
 
   @@map("stock")
 }
-
-
 
