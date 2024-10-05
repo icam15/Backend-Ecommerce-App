@@ -104,4 +104,22 @@ export class ProductController {
       next(e);
     }
   }
+
+  async deleteProduct(
+    req: Request<{ productId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { productId } = req.params;
+      await ProductService.deleteProduct(session.id, Number(productId));
+      res.status(201).json({
+        status: "success",
+        message: "delete product is successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

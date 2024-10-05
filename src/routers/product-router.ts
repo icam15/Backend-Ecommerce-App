@@ -41,6 +41,7 @@ export class ProductRouter {
       this.productController.updateProductImage
     );
     this.router.get("/:productId", this.productController.getProductById);
+    this.router.delete("/:productId", this.productController.deleteProduct);
   }
 
   getRouter(): Router {

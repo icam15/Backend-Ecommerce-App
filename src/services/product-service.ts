@@ -98,7 +98,7 @@ export class ProductService {
     // check  if valid admin
     const adminProduct = await this.checkAdminStore(userId);
     if (existProduct.storeId !== adminProduct.storeId) {
-      throw new ResponseError(400, "your does not have access of this product");
+      throw new ResponseError(400, "you does not have access of this product");
     }
 
     // update product data
@@ -151,7 +151,7 @@ export class ProductService {
     // check if valid admin
     const admin = await this.checkAdminStore(userId);
     if (admin.storeId !== existProductImage.storeId) {
-      throw new ResponseError(400, "your does not have access of this product");
+      throw new ResponseError(400, "you does not have access of this product");
     }
 
     // update product image
@@ -169,7 +169,6 @@ export class ProductService {
     }
     // get url image from bucket
     const { imageUrl } = await getUrlImageFromBucket(filePath);
-    logger.info(imageUrl);
     await prisma.productImage.update({
       where: {
         id: imageId,
@@ -192,5 +191,22 @@ export class ProductService {
       throw new ResponseError(400, "product not found");
     }
     return findProduct;
+  }
+
+  static async deleteProduct(userId: number, productId: number) {
+    // check exist product
+    const existProuct = await this.checkExistProduct(productId);
+
+    // check valid admin
+    const admin = await this.checkAdminStore(userId);
+    if (admin.storeId !== existProuct.storeId) {
+      throw new ResponseError(400, "you does not have access of this product");
+    }
+
+    // delete using transaction
+    await prisma.product.delete({
+      where: { id: productId },
+      include: { productImage: true, stock: true },
+    });
   }
 }
