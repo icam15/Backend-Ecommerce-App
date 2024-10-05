@@ -5,6 +5,7 @@ import { authenticationUser } from "../middleware/auth/authentication";
 import { AddressRouter } from "./address-router";
 import { CategoryRouter } from "./category-router";
 import { StoreRouter } from "./store-router";
+import { ProductRouter } from "./product-router";
 
 export class RootRouter {
   private router: Router;
@@ -13,6 +14,7 @@ export class RootRouter {
   private addressRouter: AddressRouter;
   private categoryRouter: CategoryRouter;
   private storeRouter: StoreRouter;
+  private productRouter: ProductRouter;
   constructor() {
     this.router = Router();
     this.authRouter = new AuthRouter();
@@ -20,6 +22,7 @@ export class RootRouter {
     this.addressRouter = new AddressRouter();
     this.categoryRouter = new CategoryRouter();
     this.storeRouter = new StoreRouter();
+    this.productRouter = new ProductRouter();
     this.initializeRouter();
   }
   private initializeRouter(): void {
@@ -36,6 +39,11 @@ export class RootRouter {
       this.categoryRouter.getRouter()
     );
     this.router.use("/store", authenticationUser, this.storeRouter.getRouter());
+    this.router.use(
+      "/product",
+      authenticationUser,
+      this.productRouter.getRouter()
+    );
   }
   getRouter() {
     return this.router;
