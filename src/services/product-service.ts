@@ -230,4 +230,25 @@ export class ProductService {
       },
     });
   }
+
+  static async setProductToActive(userId: number, productId: number) {
+    // check exist product
+    const existProduct = await this.checkExistProduct(productId);
+
+    // check valid admin
+    const admin = await this.checkAdminStore(userId);
+    if (existProduct.storeId !== admin.storeId) {
+      throw new ResponseError(400, "you does not have access of this product");
+    }
+
+    // set product to active
+    await prisma.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        status: "PUBLISHED",
+      },
+    });
+  }
 }
