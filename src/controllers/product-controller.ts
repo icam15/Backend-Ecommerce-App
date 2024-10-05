@@ -140,4 +140,22 @@ export class ProductController {
       next(e);
     }
   }
+
+  async setProductToActive(
+    req: Request<{ productId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { productId } = req.params;
+      await ProductService.setProductToActive(session.id, Number(productId));
+      res.status(201).json({
+        status: "succeess",
+        message: "set product status to active is successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

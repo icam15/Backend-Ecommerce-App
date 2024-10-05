@@ -51,6 +51,11 @@ export class ProductRouter {
       Authorization.storeAdmin,
       this.productController.setProductToInActive
     );
+    this.router.patch(
+      "/:productId/set-active",
+      Authorization.storeAdmin,
+      this.productController.setProductToActive
+    );
   }
 
   getRouter(): Router {
