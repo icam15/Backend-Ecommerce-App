@@ -41,7 +41,16 @@ export class ProductRouter {
       this.productController.updateProductImage
     );
     this.router.get("/:productId", this.productController.getProductById);
-    this.router.delete("/:productId", this.productController.deleteProduct);
+    this.router.delete(
+      "/:productId",
+      Authorization.storeAdmin,
+      this.productController.deleteProduct
+    );
+    this.router.patch(
+      "/:productId/set-inActive",
+      Authorization.storeAdmin,
+      this.productController.setProductToInActive
+    );
   }
 
   getRouter(): Router {

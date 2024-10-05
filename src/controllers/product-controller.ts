@@ -122,4 +122,22 @@ export class ProductController {
       next(e);
     }
   }
+
+  async setProductToInActive(
+    req: Request<{ productId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { productId } = req.params;
+      await ProductService.setProductToInActive(session.id, Number(productId));
+      res.status(201).json({
+        status: "success",
+        message: "set product to inActive is successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

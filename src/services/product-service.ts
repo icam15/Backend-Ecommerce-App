@@ -209,4 +209,25 @@ export class ProductService {
       include: { productImage: true, stock: true },
     });
   }
+
+  static async setProductToInActive(userId: number, productId: number) {
+    // check exist product
+    const existProduct = await this.checkExistProduct(productId);
+
+    // check valid admin
+    const admin = await this.checkAdminStore(userId);
+    if (admin.storeId !== existProduct.storeId) {
+      throw new ResponseError(400, "your does not have access of this product");
+    }
+
+    // set product to inActive
+    await prisma.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        status: "INACTIVE",
+      },
+    });
+  }
 }
