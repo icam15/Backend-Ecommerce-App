@@ -297,4 +297,16 @@ export class StoreService {
     }
     return findAdmins;
   }
+
+  static async getProductsBystore(storeId: number) {
+    const findProducts = await prisma.product.findMany({
+      where: {
+        storeId,
+      },
+    });
+    if (!findProducts) {
+      throw new ResponseError(400, "there are no any product");
+    }
+    return findProducts;
+  }
 }

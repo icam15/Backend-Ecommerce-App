@@ -160,6 +160,7 @@ model Store{
   productImage ProductImage[]
   product Product[]
   stock Stock[]
+  storeEtalase StoreEtalase[]
 
   @@map("store")
 }
@@ -195,8 +196,10 @@ model Product {
   // Relation
   category Category @relation(fields: [categoryId], references: [id])
   store Store @relation(fields: [storeId], references: [id])
+  storeEtalase StoreEtalase? @relation(fields: [storeEtalaseId], references: [id])
   productImage ProductImage[]
   stock Stock?
+  
 
   
 
@@ -232,5 +235,20 @@ model Stock {
 
 
   @@map("stock")
+}
+
+model StoreEtalase {
+  id Int @id @default(autoincrement())
+  storeId Int
+  name String
+  iconUrl String @map("icon_url")
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt 
+
+  // relation
+  store Store @relation(fields: [storeId], references: [id])
+  product Product[]
+
+  @@map("store_etalase")
 }
 

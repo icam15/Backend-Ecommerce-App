@@ -51,6 +51,7 @@ export class StoreRouter {
       Authorization.storeAdmin,
       this.storeController.getStoreAdmins
     );
+    this.router.get("/:storeId/products");
   }
   getRouter(): Router {
     return this.router;
