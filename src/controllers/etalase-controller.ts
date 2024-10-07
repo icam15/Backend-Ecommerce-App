@@ -64,4 +64,22 @@ export class EtalaseController {
       next(e);
     }
   }
+
+  async getEtalasesByStore(
+    req: Request<{ storeId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { storeId } = req.params;
+      const result = await EtalaseService.getEtalaseByStoreId(Number(storeId));
+      res.status(201).json({
+        status: "success",
+        message: "get all etalase by store is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

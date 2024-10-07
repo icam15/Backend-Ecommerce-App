@@ -121,4 +121,15 @@ export class EtalaseService {
       },
     });
   }
+  static async getEtalaseByStoreId(storeId: number) {
+    const findStoreEtalases = await prisma.storeEtalase.findMany({
+      where: {
+        storeId,
+      },
+    });
+    if (!findStoreEtalases) {
+      throw new ResponseError(400, "there are no any etalase in this store");
+    }
+    return findStoreEtalases;
+  }
 }
