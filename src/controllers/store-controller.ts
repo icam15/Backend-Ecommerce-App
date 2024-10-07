@@ -192,4 +192,22 @@ export class StoreController {
       next(e);
     }
   }
+
+  async getStoreProducts(
+    req: Request<{ storeId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { storeId } = req.params;
+      const result = await StoreService.getProductsBystore(Number(storeId));
+      res.status(201).json({
+        status: "success",
+        message: "get product by store is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

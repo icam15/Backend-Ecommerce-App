@@ -6,6 +6,7 @@ import { AddressRouter } from "./address-router";
 import { CategoryRouter } from "./category-router";
 import { StoreRouter } from "./store-router";
 import { ProductRouter } from "./product-router";
+import { EtalaseRouter } from "./etalase-router";
 
 export class RootRouter {
   private router: Router;
@@ -15,6 +16,7 @@ export class RootRouter {
   private categoryRouter: CategoryRouter;
   private storeRouter: StoreRouter;
   private productRouter: ProductRouter;
+  private etalaseRouter: EtalaseRouter;
   constructor() {
     this.router = Router();
     this.authRouter = new AuthRouter();
@@ -23,6 +25,7 @@ export class RootRouter {
     this.categoryRouter = new CategoryRouter();
     this.storeRouter = new StoreRouter();
     this.productRouter = new ProductRouter();
+    this.etalaseRouter = new EtalaseRouter();
     this.initializeRouter();
   }
   private initializeRouter(): void {
@@ -43,6 +46,11 @@ export class RootRouter {
       "/product",
       authenticationUser,
       this.productRouter.getRouter()
+    );
+    this.router.use(
+      "/etalase",
+      authenticationUser,
+      this.etalaseRouter.getRouter()
     );
   }
   getRouter() {
