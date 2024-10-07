@@ -3,7 +3,11 @@ import { ResponseError } from "../helpers/response-error";
 import { EtalaseService } from "../services/etalase-services";
 import { validate } from "../validation/validation";
 import { EtalaseStoreValidation } from "../validation/etalase-validation";
-import { CreateEtalaseStorePayload } from "../types/etalase-types";
+import {
+  CreateEtalaseStorePayload,
+  UpdateEtalaseStorePayload,
+} from "../types/etalase-types";
+import { logger } from "../libs/logger";
 
 export class EtalaseController {
   async createEtalase(req: Request, res: Response, next: NextFunction) {
@@ -26,6 +30,35 @@ export class EtalaseController {
         status: "success",
         message: "create new etalase store is success",
         result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async updateEtalase(
+    req: Request<{ etalaseId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const payload = validate(
+        EtalaseStoreValidation.updateEtalaseValidation,
+        req.body as UpdateEtalaseStorePayload
+      );
+      const icon = req.file!;
+      logger.info(payload);
+      const { etalaseId } = req.params;
+      await EtalaseService.updateEtalaseStore(
+        session.id,
+        Number(etalaseId),
+        icon,
+        payload
+      );
+      res.status(201).json({
+        status: "success",
+        message: "update etalase store is successfully",
       });
     } catch (e) {
       next(e);
