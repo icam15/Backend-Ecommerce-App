@@ -1,0 +1,2 @@
+1. there is bug on the accoun verify, i think the generate cookie not contain user role
+2. set category id in prisma seedd
