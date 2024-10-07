@@ -20,11 +20,10 @@ export class EtalaseService {
     return findAdmin;
   }
 
-  static async checkExistEtalaseStore(storeId: number, etalaseId: number) {
+  static async checkExistEtalaseStore(etalaseId: number) {
     const existEtalase = await prisma.storeEtalase.findFirst({
       where: {
         id: etalaseId,
-        storeId,
       },
     });
     if (!existEtalase) {
@@ -79,10 +78,7 @@ export class EtalaseService {
     payload: UpdateEtalaseStorePayload
   ) {
     // check exist etalase store
-    const existEtalase = await this.checkExistEtalaseStore(
-      payload.storeId,
-      etalaseId
-    );
+    const existEtalase = await this.checkExistEtalaseStore(etalaseId);
     // check if valid admin
     const admin = await this.checkIsAdmin(userId);
     if (admin.storeId !== existEtalase.storeId) {
@@ -131,5 +127,23 @@ export class EtalaseService {
       throw new ResponseError(400, "there are no any etalase in this store");
     }
     return findStoreEtalases;
+  }
+
+  static async deleteEtalaseStore(userId: number, etalaseId: number) {
+    // check exist etalase
+    const existEtalase = await this.checkExistEtalaseStore(etalaseId);
+
+    // check valid admin store
+    const admin = await this.checkIsAdmin(userId);
+    if (admin.storeId !== existEtalase.storeId) {
+      throw new ResponseError(400, "you does not have access of this store");
+    }
+
+    // delete etalase store
+    await prisma.storeEtalase.delete({
+      where: {
+        id: etalaseId,
+      },
+    });
   }
 }

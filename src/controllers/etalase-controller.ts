@@ -82,4 +82,22 @@ export class EtalaseController {
       next(e);
     }
   }
+
+  async deleteEtalaseStore(
+    req: Request<{ etalaseId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { etalaseId } = req.params;
+      await EtalaseService.deleteEtalaseStore(session.id, parseInt(etalaseId));
+      res.status(201).json({
+        status: "success",
+        message: "delete etalase store is success",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
