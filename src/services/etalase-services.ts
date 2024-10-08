@@ -48,6 +48,7 @@ export class EtalaseService {
     // upload image to bucket
     const originalFileName = icon.originalname.split(".");
     const fileExt = originalFileName[originalFileName.length - 1].toLowerCase();
+
     const filePath = `${admin.storeId}-iconEtalase-${Date.now()}.${fileExt}`;
     const { err } = await uploadImageToBucket(filePath, arrayBufferIcon);
     if (err) {
@@ -140,5 +141,31 @@ export class EtalaseService {
       throw new ResponseError(400, "etalase not found");
     }
     return findEtalase;
+  }
+
+  static async getProductsByEtalaseId(etalaseId: number) {
+    // check exist store etalase
+    const existEtalaseStore = await prisma.storeEtalase.findUnique({
+      where: {
+        id: etalaseId,
+      },
+    });
+    if (!existEtalaseStore) {
+      throw new ResponseError(400, "etalase not found in this store");
+    }
+
+    // get products by etalase store
+    const productsByEtalase = await prisma.product.findMany({
+      where: {
+        storeEtalaseId: etalaseId,
+      },
+    });
+    if (!productsByEtalase) {
+      throw new ResponseError(
+        400,
+        "there are no any product by the etalase store "
+      );
+    }
+    return productsByEtalase;
   }
 }
