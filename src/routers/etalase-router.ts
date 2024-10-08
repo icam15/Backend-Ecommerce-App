@@ -34,6 +34,7 @@ export class EtalaseRouter {
       "/:etalaseId",
       this.etalaseController.deleteEtalaseStore
     );
+    this.router.get("/:etalaseId", this.etalaseController.getEtalase);
   }
 
   getRouter(): Router {

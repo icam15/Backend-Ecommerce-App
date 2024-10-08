@@ -129,4 +129,16 @@ export class EtalaseService {
       },
     });
   }
+
+  static async getEtalaseById(etalaseId: number) {
+    const findEtalase = await prisma.storeEtalase.findFirst({
+      where: {
+        id: etalaseId,
+      },
+    });
+    if (!findEtalase) {
+      throw new ResponseError(400, "etalase not found");
+    }
+    return findEtalase;
+  }
 }
