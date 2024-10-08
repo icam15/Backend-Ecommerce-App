@@ -23,6 +23,18 @@ export class EtalaseRouter {
       convertFieldToInteger(fieldToInteger),
       this.etalaseController.createEtalase
     );
+    this.router.patch(
+      "/:etalaseId",
+      Authorization.storeAdmin,
+      uploadFile.single("icon"),
+      convertFieldToInteger(fieldToInteger),
+      this.etalaseController.updateEtalase
+    );
+    this.router.delete(
+      "/:etalaseId",
+      this.etalaseController.deleteEtalaseStore
+    );
+    this.router.get("/:etalaseId", this.etalaseController.getEtalase);
   }
 
   getRouter(): Router {
