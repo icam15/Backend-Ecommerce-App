@@ -82,4 +82,22 @@ export class EtalaseController {
       next(e);
     }
   }
+
+  async getEtalase(
+    req: Request<{ etalaseId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { etalaseId } = req.params;
+      const result = await EtalaseService.getEtalaseById(parseInt(etalaseId));
+      res.status(201).json({
+        status: "success",
+        message: "get etalase is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

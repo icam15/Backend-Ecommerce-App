@@ -75,7 +75,6 @@ export class EtalaseService {
   ) {
     // check exist etalase store
     const existEtalase = await this.checkExistEtalaseStore(etalaseId);
-    
     // check if valid admin
     const admin = await this.checkIsAdmin(userId);
     if (admin.storeId !== existEtalase.storeId) {
@@ -129,5 +128,17 @@ export class EtalaseService {
         id: etalaseId,
       },
     });
+  }
+
+  static async getEtalaseById(etalaseId: number) {
+    const findEtalase = await prisma.storeEtalase.findFirst({
+      where: {
+        id: etalaseId,
+      },
+    });
+    if (!findEtalase) {
+      throw new ResponseError(400, "etalase not found");
+    }
+    return findEtalase;
   }
 }
