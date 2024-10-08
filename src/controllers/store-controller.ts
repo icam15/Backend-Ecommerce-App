@@ -210,4 +210,22 @@ export class StoreController {
       next(e);
     }
   }
+
+  async getStoreEtalases(
+    req: Request<{ storeId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { storeId } = req.params;
+      const result = await StoreService.getEtalasesByStore(Number(storeId));
+      res.status(201).json({
+        status: "success",
+        message: "get store etalase is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

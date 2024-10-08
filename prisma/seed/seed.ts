@@ -36,6 +36,7 @@ async function main() {
     //     },
     //   });
     // }
+    
 
     // get list of province
     const getListProvince = await fetch(`${rajaOngkirBaseUrl}/province`, {

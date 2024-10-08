@@ -252,3 +252,4 @@ model StoreEtalase {
   @@map("store_etalase")
 }
 
+

@@ -3,6 +3,7 @@ import { ResponseError } from "../helpers/response-error";
 import { EtalaseService } from "../services/etalase-services";
 import { validate } from "../validation/validation";
 import { EtalaseStoreValidation } from "../validation/etalase-validation";
+
 import {
   CreateEtalaseStorePayload,
   UpdateEtalaseStorePayload,
@@ -94,6 +95,26 @@ export class EtalaseController {
       res.status(201).json({
         status: "success",
         message: "get etalase is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async getProductsByEtalase(
+    req: Request<{ etalaseId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { etalaseId } = req.params;
+      const result = await EtalaseService.getProductsByEtalaseId(
+        Number(etalaseId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "get product by etalase is success",
         result,
       });
     } catch (e) {
