@@ -75,6 +75,7 @@ export class EtalaseService {
   ) {
     // check exist etalase store
     const existEtalase = await this.checkExistEtalaseStore(etalaseId);
+    
     // check if valid admin
     const admin = await this.checkIsAdmin(userId);
     if (admin.storeId !== existEtalase.storeId) {

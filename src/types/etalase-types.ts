@@ -5,3 +5,8 @@ export type CreateEtalaseStorePayload = {
 export type UpdateEtalaseStorePayload = {
   name: string;
 };
+
+export type UpdateEtalaseStorePayload = {
+  name: string;
+  storeId: number;
+};
