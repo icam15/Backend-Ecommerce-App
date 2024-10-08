@@ -11,6 +11,7 @@ const stringToIntegerFields = [
   "discountPrice",
   "storeEtalaseId",
 ];
+
 export class ProductRouter {
   private router: Router;
   private productController: ProductController;
@@ -24,7 +25,7 @@ export class ProductRouter {
     this.router.post(
       "/",
       Authorization.storeAdmin,
-      uploadFile.array("images", 5),
+      uploadFile.array("images"),
       convertFieldToInteger(stringToIntegerFields),
       this.productController.createProduct
     );
@@ -32,6 +33,28 @@ export class ProductRouter {
       "/:productId",
       Authorization.storeAdmin,
       this.productController.updateProductData
+    );
+    this.router.patch(
+      "/:productId/images/:imageId",
+      uploadFile.single("image"),
+      Authorization.storeAdmin,
+      this.productController.updateProductImage
+    );
+    this.router.get("/:productId", this.productController.getProductById);
+    this.router.delete(
+      "/:productId",
+      Authorization.storeAdmin,
+      this.productController.deleteProduct
+    );
+    this.router.patch(
+      "/:productId/set-inActive",
+      Authorization.storeAdmin,
+      this.productController.setProductToInActive
+    );
+    this.router.patch(
+      "/:productId/set-active",
+      Authorization.storeAdmin,
+      this.productController.setProductToActive
     );
   }
 

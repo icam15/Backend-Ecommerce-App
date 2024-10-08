@@ -7,6 +7,9 @@ import {
   CreateProductPayload,
   UpdateProductPayload,
 } from "../types/product-types";
+
+export class ProductController {
+  async createProduct(req: Request, res: Response, next: NextFunction) {
     try {
       const session = req.user;
       const payload = validate(ProductValidation.createProductValidation, {
@@ -51,6 +54,105 @@ import {
       res.status(201).json({
         status: "success",
         message: "update product data is successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async updateProductImage(
+    req: Request<{ productId: string; imageId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { productId, imageId } = req.params;
+      const session = req.user;
+      const image = req.file;
+      if (!image) {
+        throw new ResponseError(400, "required image field");
+      }
+      await ProductService.updateProductImage(
+        session.id,
+        parseInt(productId),
+        parseInt(imageId),
+        image
+      );
+      res.status(201).json({
+        status: "success",
+        message: "update image product successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async getProductById(
+    req: Request<{ productId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { productId } = req.params;
+      const result = await ProductService.getProductById(parseInt(productId));
+      res.status(201).json({
+        status: "success",
+        message: "get product is successfully",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async deleteProduct(
+    req: Request<{ productId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { productId } = req.params;
+      await ProductService.deleteProduct(session.id, Number(productId));
+      res.status(201).json({
+        status: "success",
+        message: "delete product is successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async setProductToInActive(
+    req: Request<{ productId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { productId } = req.params;
+      await ProductService.setProductToInActive(session.id, Number(productId));
+      res.status(201).json({
+        status: "success",
+        message: "set product to inActive is successfully",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async setProductToActive(
+    req: Request<{ productId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { productId } = req.params;
+      await ProductService.setProductToActive(session.id, Number(productId));
+      res.status(201).json({
+        status: "succeess",
+        message: "set product status to active is successfully",
       });
     } catch (e) {
       next(e);

@@ -297,4 +297,59 @@ export class StoreService {
     }
     return findAdmins;
   }
+
+  static async getProductsBystore(storeId: number) {
+    const findProducts = await prisma.product.findMany({
+      where: {
+        storeId,
+      },
+    });
+    if (!findProducts) {
+      throw new ResponseError(400, "there are no any product in this store");
+    }
+    return findProducts;
+  }
+
+  static async getEtalasesByStore(storeId: number) {
+    const findEtalaseStore = await prisma.storeEtalase.findMany({
+      where: {
+        storeId,
+      },
+    });
+    if (!findEtalaseStore) {
+      throw new ResponseError(400, "there are no any etalase in this store");
+    }
+    return findEtalaseStore;
+  }
+
+  static async getProductsByStoreEtalase(storeId: number, etalaseId: number) {
+    // check exist store
+    const existStore = await this.findStore(storeId);
+
+    // check exist store etalase
+    const existEtalaseStore = await prisma.storeEtalase.findUnique({
+      where: {
+        id: etalaseId,
+        storeId,
+      },
+    });
+    if (!existEtalaseStore) {
+      throw new ResponseError(400, "etalase not found in this store");
+    }
+
+    // get products by etalase store
+    const productsByEtalase = await prisma.product.findMany({
+      where: {
+        storeId,
+        storeEtalaseId: etalaseId,
+      },
+    });
+    if (!productsByEtalase) {
+      throw new ResponseError(
+        400,
+        "there are no any product by the etalase store "
+      );
+    }
+    return productsByEtalase;
+  }
 }

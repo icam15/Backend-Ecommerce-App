@@ -6,6 +6,7 @@ import {
 } from "../types/product-types";
 import { decode } from "base64-arraybuffer";
 import { getUrlImageFromBucket, uploadImageToBucket } from "../utils/supabase";
+import { logger } from "../libs/logger";
 
 export class ProductService {
   static async checkAdminStore(userId: number) {
@@ -33,12 +34,14 @@ export class ProductService {
     return findProduct;
   }
 
+  static async createProduct(
     userId: number,
     images: Express.Multer.File[],
     payload: CreateProductPayload
   ) {
     // check if valid admin
     const admin = await this.checkAdminStore(userId);
+
     // create new product
     const newProduct = await prisma.product.create({
       data: {
@@ -48,36 +51,38 @@ export class ProductService {
         weight: Number(payload.weight),
         categoryId: Number(payload.categoryId),
         storeId: admin.storeId,
+        storeEtalaseId: payload.storeEtalaseId,
         stock: { create: { amount: payload.quantity, storeId: admin.storeId } },
+      },
     });
 
+    logger.info(images);
     // create new product images
     if (images.length > 0) {
-      for (const image of images) {
-        async () => {
-          // decode file buffer to string base64 encoding and then decode base 64 to array buffer
-          const base64Image = image.buffer.toString("base64");
-          const arrayBufferImage = decode(base64Image);
+      images.forEach(async (image) => {
+        // decode file buffer to string base64 encoding and then decode base 64 to array buffer
+        const base64Image = image.buffer.toString("base64");
+        const arrayBufferImage = decode(base64Image);
 
-          // upload image to bucket
-          const originalFileName = image.originalname.split(".");
-          const fileExt =
-            originalFileName[originalFileName.length - 1].toLowerCase();
-          const filePath = `${newProduct.id}-${Date.now()}.${fileExt}`;
-          const { err } = await uploadImageToBucket(filePath, arrayBufferImage);
-          if (err) {
-            throw new ResponseError(400, err.message);
-          }
-          // get url image from bucket
-          const { imageUrl } = await getUrlImageFromBucket(filePath);
-          await prisma.productImage.create({
-            data: {
-              imageUrl,
-              productId: newProduct.id,
-            },
-          });
-        };
-      }
+        // upload image to bucket
+        const originalFileName = image.originalname.split(".");
+        const fileExt =
+          originalFileName[originalFileName.length - 1].toLowerCase();
+        const filePath = `${newProduct.id}-${Date.now()}.${fileExt}`;
+        const { err } = await uploadImageToBucket(filePath, arrayBufferImage);
+        if (err) {
+          throw new ResponseError(400, err.message);
+        }
+        // get url image from bucket
+        const { imageUrl } = await getUrlImageFromBucket(filePath);
+        await prisma.productImage.create({
+          data: {
+            imageUrl,
+            productId: newProduct.id,
+            storeId: newProduct.storeId,
+          },
+        });
+      });
     }
     return newProduct;
   }
@@ -93,7 +98,7 @@ export class ProductService {
     // check  if valid admin
     const adminProduct = await this.checkAdminStore(userId);
     if (existProduct.storeId !== adminProduct.storeId) {
-      throw new ResponseError(400, "your does not have access of this product");
+      throw new ResponseError(400, "you does not have access of this product");
     }
 
     // update product data
@@ -124,6 +129,126 @@ export class ProductService {
         },
       },
     });
+  }
 
+  static async updateProductImage(
+    userId: number,
+    productId: number,
+    imageId: number,
+    image: Express.Multer.File
+  ) {
+    // check exist product image
+    const existProductImage = await prisma.productImage.findUnique({
+      where: {
+        id: imageId,
+        productId,
+      },
+    });
+    if (!existProductImage) {
+      throw new ResponseError(400, "product image not found");
+    }
+
+    // check if valid admin
+    const admin = await this.checkAdminStore(userId);
+    if (admin.storeId !== existProductImage.storeId) {
+      throw new ResponseError(400, "you does not have access of this product");
+    }
+
+    // update product image
+    // decode file buffer to string base64 encoding and then decode base 64 to array buffer
+    const base64Image = image.buffer.toString("base64");
+    const arrayBufferImage = decode(base64Image);
+
+    // upload image to bucket
+    const originalFileName = image.originalname.split(".");
+    const fileExt = originalFileName[originalFileName.length - 1].toLowerCase();
+    const filePath = `${existProductImage.id}-${Date.now()}.${fileExt}`;
+    const { err } = await uploadImageToBucket(filePath, arrayBufferImage);
+    if (err) {
+      throw new ResponseError(400, err.message);
+    }
+    // get url image from bucket
+    const { imageUrl } = await getUrlImageFromBucket(filePath);
+    await prisma.productImage.update({
+      where: {
+        id: imageId,
+        productId,
+      },
+      data: {
+        imageUrl,
+      },
+    });
+  }
+
+  static async getProductById(productId: number) {
+    const findProduct = await prisma.product.findUnique({
+      where: {
+        id: productId,
+      },
+      include: { productImage: true, stock: true, store: true },
+    });
+    if (!findProduct) {
+      throw new ResponseError(400, "product not found");
+    }
+    return findProduct;
+  }
+
+  static async deleteProduct(userId: number, productId: number) {
+    // check exist product
+    const existProuct = await this.checkExistProduct(productId);
+
+    // check valid admin
+    const admin = await this.checkAdminStore(userId);
+    if (admin.storeId !== existProuct.storeId) {
+      throw new ResponseError(400, "you does not have access of this product");
+    }
+
+    // delete using transaction
+    await prisma.product.delete({
+      where: { id: productId },
+      include: { productImage: true, stock: true },
+    });
+  }
+
+  static async setProductToInActive(userId: number, productId: number) {
+    // check exist product
+    const existProduct = await this.checkExistProduct(productId);
+
+    // check valid admin
+    const admin = await this.checkAdminStore(userId);
+    if (admin.storeId !== existProduct.storeId) {
+      throw new ResponseError(400, "your does not have access of this product");
+    }
+
+    // set product to inActive
+    await prisma.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        status: "INACTIVE",
+      },
+    });
+  }
+
+  static async setProductToActive(userId: number, productId: number) {
+    // check exist product
+    const existProduct = await this.checkExistProduct(productId);
+
+    // check valid admin
+    const admin = await this.checkAdminStore(userId);
+    if (existProduct.storeId !== admin.storeId) {
+      throw new ResponseError(400, "you does not have access of this product");
+    }
+
+    // set product to active
+    await prisma.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        status: "PUBLISHED",
+      },
+    });
   }
 }

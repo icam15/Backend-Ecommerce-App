@@ -27,15 +27,16 @@ async function main() {
     headers.append("key", rajaOngkirApiKey);
 
     // get list of category
-    const categories = listCategories(1);
-    for (const category of categories) {
-      await prisma.category.create({
-        data: {
-          name: category.name,
-          ecommerceAdminId: category.ecommerceAdminId,
-        },
-      });
-    }
+    // const categories = listCategories(1);
+    // for (const category of categories) {
+    //   await prisma.category.create({
+    //     data: {
+    //       name: category.name,
+    //       ecommerceAdminId: category.ecommerceAdminId,
+    //     },
+    //   });
+    // }
+    
 
     // get list of province
     const getListProvince = await fetch(`${rajaOngkirBaseUrl}/province`, {
