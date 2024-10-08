@@ -55,6 +55,10 @@ export class StoreRouter {
       "/:storeId/products",
       this.storeController.getStoreProducts
     );
+    this.router.get(
+      "/:storeId/etalases",
+      this.storeController.getStoreEtalases
+    );
   }
   getRouter(): Router {
     return this.router;

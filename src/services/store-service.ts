@@ -305,8 +305,20 @@ export class StoreService {
       },
     });
     if (!findProducts) {
-      throw new ResponseError(400, "there are no any product");
+      throw new ResponseError(400, "there are no any product in this store");
     }
     return findProducts;
+  }
+
+  static async getEtalasesByStore(storeId: number) {
+    const findEtalaseStore = await prisma.storeEtalase.findMany({
+      where: {
+        storeId,
+      },
+    });
+    if (!findEtalaseStore) {
+      throw new ResponseError(400, "there are no any etalase in this store");
+    }
+    return findEtalaseStore;
   }
 }
