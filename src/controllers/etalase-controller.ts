@@ -101,4 +101,24 @@ export class EtalaseController {
       next(e);
     }
   }
+
+  async getProductsByEtalase(
+    req: Request<{ etalaseId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { etalaseId } = req.params;
+      const result = await EtalaseService.getProductsByEtalaseId(
+        Number(etalaseId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "get product by etalase is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
