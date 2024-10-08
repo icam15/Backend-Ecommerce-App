@@ -39,10 +39,6 @@ export class EtalaseService {
   ) {
     // check if valid admin
     const admin = await this.checkIsAdmin(userId);
-    console.log(admin.storeId, payload.storeId);
-    if (admin.storeId !== payload.storeId) {
-      throw new ResponseError(400, "you does not have access of this store");
-    }
 
     // upload icon to bucket and get the url
     // decode file buffer to string base64 encoding and then decode base 64 to array buffer
@@ -52,7 +48,7 @@ export class EtalaseService {
     // upload image to bucket
     const originalFileName = icon.originalname.split(".");
     const fileExt = originalFileName[originalFileName.length - 1].toLowerCase();
-    const filePath = `${payload.storeId}-iconEtalase-${Date.now()}.${fileExt}`;
+    const filePath = `${admin.storeId}-iconEtalase-${Date.now()}.${fileExt}`;
     const { err } = await uploadImageToBucket(filePath, arrayBufferIcon);
     if (err) {
       throw new ResponseError(400, err.message);
@@ -65,7 +61,7 @@ export class EtalaseService {
       data: {
         name: payload.name,
         iconUrl: imageUrl,
-        storeId: payload.storeId,
+        storeId: admin.storeId,
       },
     });
     return newEtalaseStore;
@@ -96,9 +92,7 @@ export class EtalaseService {
       const originalFileName = icon.originalname.split(".");
       const fileExt =
         originalFileName[originalFileName.length - 1].toLowerCase();
-      const filePath = `${
-        payload.storeId
-      }-iconEtalase-${Date.now()}.${fileExt}`;
+      const filePath = `${admin.storeId}-iconEtalase-${Date.now()}.${fileExt}`;
       const { err } = await uploadImageToBucket(filePath, arrayBufferIcon);
       if (err) {
         throw new ResponseError(400, err.message);
@@ -117,17 +111,6 @@ export class EtalaseService {
         iconUrl,
       },
     });
-  }
-  static async getEtalaseByStoreId(storeId: number) {
-    const findStoreEtalases = await prisma.storeEtalase.findMany({
-      where: {
-        storeId,
-      },
-    });
-    if (!findStoreEtalases) {
-      throw new ResponseError(400, "there are no any etalase in this store");
-    }
-    return findStoreEtalases;
   }
 
   static async deleteEtalaseStore(userId: number, etalaseId: number) {

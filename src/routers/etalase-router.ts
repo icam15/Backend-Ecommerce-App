@@ -30,7 +30,6 @@ export class EtalaseRouter {
       convertFieldToInteger(fieldToInteger),
       this.etalaseController.updateEtalase
     );
-    this.router.get("/:storeId", this.etalaseController.getEtalasesByStore);
     this.router.delete(
       "/:etalaseId",
       this.etalaseController.deleteEtalaseStore
