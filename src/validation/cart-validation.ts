@@ -11,8 +11,13 @@ export class CartValidation {
     quantity: z.number().min(-1),
   });
 
-  static readonly selectCartItemPayload = z.object({
+  static readonly selectCartItemValidation = z.object({
     cartItemId: z.number(),
+    isSelected: z.boolean(),
+  });
+
+  static readonly selectCartItemsByStoreValidation = z.object({
+    storeId: z.number(),
     isSelected: z.boolean(),
   });
 }

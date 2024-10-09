@@ -12,3 +12,8 @@ export type SelectCartItemPayload = {
   cartItemId: number;
   isSelected: boolean;
 };
+
+export type SelectCartItemsByStorePayload = {
+  storeId: number;
+  isSelected: boolean;
+};
