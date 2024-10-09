@@ -5,6 +5,7 @@ import { CartValidation } from "../validation/cart-validation";
 import {
   AddCartItemPayload,
   SelectCartItemPayload,
+  SelectCartItemsByStorePayload,
   UpdateCartItemPayload,
 } from "../types/cart-types";
 import { ResponseError } from "../helpers/response-error";
@@ -64,7 +65,7 @@ export class CartController {
     try {
       const session = req.user;
       const payload = validate(
-        CartValidation.selectCartItemPayload,
+        CartValidation.selectCartItemValidation,
         req.body as SelectCartItemPayload
       );
       const result = await CartServcie.selectCartItem(session.id, payload);
@@ -78,7 +79,7 @@ export class CartController {
     }
   }
 
-  async selectAllCartitems(
+  async selectAllCartItems(
     req: Request<{}, {}, { isSelected: boolean }>,
     res: Response,
     next: NextFunction
@@ -97,6 +98,31 @@ export class CartController {
       res.status(201).json({
         status: "success",
         message: "select all cart items is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async selectCartItemsByStore(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const payload = validate(
+        CartValidation.selectCartItemsByStoreValidation,
+        req.body as SelectCartItemsByStorePayload
+      );
+      const result = await CartServcie.selectCartItemsByStore(
+        session.id,
+        payload
+      );
+      res.status(201).json({
+        status: "success",
+        message: "selected cart item by store is success",
         result,
       });
     } catch (e) {
