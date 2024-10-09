@@ -7,3 +7,8 @@ export type UpdateCartItemPayload = {
   cartItemId: number;
   quantity: number;
 };
+
+export type SelectCartItemPayload = {
+  cartItemId: number;
+  isSelected: boolean;
+};

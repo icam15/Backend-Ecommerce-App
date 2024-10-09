@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { boolean, z } from "zod";
 
 export class CartValidation {
   static readonly addCartItemValidation = z.object({
@@ -9,5 +9,10 @@ export class CartValidation {
   static readonly udpateCartItemValidation = z.object({
     cartItemId: z.number(),
     quantity: z.number().min(-1),
+  });
+
+  static readonly selectCartItemPayload = z.object({
+    cartItemId: z.number(),
+    isSelected: z.boolean(),
   });
 }

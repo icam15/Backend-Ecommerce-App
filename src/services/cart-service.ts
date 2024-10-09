@@ -1,6 +1,10 @@
 import { ResponseError } from "../helpers/response-error";
 import { prisma } from "../libs/prisma";
-import { AddCartItemPayload, UpdateCartItemPayload } from "../types/cart-types";
+import {
+  AddCartItemPayload,
+  SelectCartItemPayload,
+  UpdateCartItemPayload,
+} from "../types/cart-types";
 
 export class CartServcie {
   static async createCart(userId: number) {
@@ -134,5 +138,33 @@ export class CartServcie {
       },
     });
     return updateCartItem;
+  }
+
+  static async selectCartItem(userId: number, payload: SelectCartItemPayload) {
+    // get user cart
+    const userCart = await this.findCart(userId);
+
+    // check exist cart item and compare cart id user with exist cart item
+    const existCartItem = await prisma.cartItem.findUnique({
+      where: {
+        id: payload.cartItemId,
+      },
+    });
+    if (!existCartItem) {
+      throw new ResponseError(400, "cart item not found");
+    } else if (userCart.id !== existCartItem.cartId) {
+      throw new ResponseError(400, "you does not have access of this cart");
+    }
+
+    // select cart item
+    const selectCartItem = await prisma.cartItem.update({
+      where: {
+        id: existCartItem.id,
+      },
+      data: {
+        isSelected: payload.isSelected,
+      },
+    });
+    return selectCartItem;
   }
 }
