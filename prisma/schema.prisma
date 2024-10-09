@@ -45,10 +45,11 @@ model User{
   isVerified UserStatus @default(UNVERIFIED)
   phoneNumber String? @map("phone_number")
  
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt 
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt
 
   //Relation
+  cart Cart?
   storeAdmin StoreAdmin[]
   userToken UserToken?
   categories Category[]
@@ -84,8 +85,8 @@ model Address {
   provinceId Int 
   longitude Float
   latitude Float
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
 
   // Relation
   user User @relation(fields: [userId], references: [id])
@@ -100,7 +101,6 @@ model City {
   name String
   cityType CityType @map("city_type")
   provinceId Int 
-
 
   // Relation
   province Province @relation(fields: [provinceId], references: [id])
@@ -199,6 +199,7 @@ model Product {
   storeEtalase StoreEtalase? @relation(fields: [storeEtalaseId], references: [id])
   productImage ProductImage[]
   stock Stock?
+  cartItem CartItem[]
   
 
   
@@ -239,10 +240,10 @@ model Stock {
 
 model StoreEtalase {
   id Int @id @default(autoincrement())
-  storeId Int
+  storeId Int 
   name String
   iconUrl String @map("icon_url")
-  createAt DateTime @default(now())
+  createAt DateTime @default(now()) @map("create_at")
   updateAt DateTime @updatedAt 
 
   // relation
@@ -250,6 +251,35 @@ model StoreEtalase {
   product Product[]
 
   @@map("store_etalase")
+}
+
+model Cart {
+  id Int @id @default(autoincrement())
+  userId Int @unique @map("user_id")
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
+
+  // Relation
+  user User @relation(fields: [userId], references: [id])
+  cartItem CartItem[]
+
+  @@map("cart")
+}
+
+model CartItem {
+  id Int @id @default(autoincrement())
+  productId Int @map("product_id")
+  cartId Int @map("cart_id")
+  quantity Int
+  isSelected Boolean @default(false) @map("is_selected")
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
+
+  // Relation
+  product Product @relation(fields: [productId], references: [id])
+  cart Cart @relation(fields: [cartId], references: [id])
+
+  @@map("cart_item")
 }
 
 
