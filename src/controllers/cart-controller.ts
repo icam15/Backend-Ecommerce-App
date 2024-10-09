@@ -9,6 +9,7 @@ import {
   UpdateCartItemPayload,
 } from "../types/cart-types";
 import { ResponseError } from "../helpers/response-error";
+import { z } from "zod";
 
 export class CartController {
   async getCart(req: Request, res: Response, next: NextFunction) {
@@ -87,8 +88,7 @@ export class CartController {
     try {
       const session = req.user;
       const { isSelected } = req.body;
-      const isBoolean = isSelected === false || true;
-      if (!isBoolean) {
+      if (typeof isSelected !== "boolean" || isSelected === undefined) {
         throw new ResponseError(403, "isSelected field required boolean type");
       }
       const result = await CartServcie.selectAllCartItems(
@@ -123,6 +123,31 @@ export class CartController {
       res.status(201).json({
         status: "success",
         message: "selected cart item by store is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async deleteCartItem(
+    req: Request<{ itemId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { itemId } = req.params;
+      if (itemId === undefined) {
+        throw new ResponseError(400, "itemId field is required");
+      }
+      const result = await CartServcie.deleteCartItem(
+        session.id,
+        Number(itemId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "delete cart item is success",
         result,
       });
     } catch (e) {
