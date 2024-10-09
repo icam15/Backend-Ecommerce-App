@@ -7,6 +7,7 @@ import {
   SelectCartItemPayload,
   UpdateCartItemPayload,
 } from "../types/cart-types";
+import { ResponseError } from "../helpers/response-error";
 
 export class CartController {
   async getCart(req: Request, res: Response, next: NextFunction) {
@@ -70,6 +71,32 @@ export class CartController {
       res.status(201).json({
         status: "success",
         message: "selected cart item success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async selectAllCartitems(
+    req: Request<{}, {}, { isSelected: boolean }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { isSelected } = req.body;
+      const isBoolean = isSelected === false || true;
+      if (!isBoolean) {
+        throw new ResponseError(403, "isSelected field required boolean type");
+      }
+      const result = await CartServcie.selectAllCartItems(
+        session.id,
+        isSelected
+      );
+      res.status(201).json({
+        status: "success",
+        message: "select all cart items is success",
         result,
       });
     } catch (e) {

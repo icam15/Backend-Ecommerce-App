@@ -167,4 +167,23 @@ export class CartServcie {
     });
     return selectCartItem;
   }
+
+  static async selectAllCartItems(userId: number, isSelected: boolean) {
+    // get cart user
+    const userCart = await this.findCart(userId);
+
+    // select all items in the cart
+    const cartItems = await prisma.cartItem.updateMany({
+      where: {
+        cartId: userCart.id,
+      },
+      data: {
+        isSelected: isSelected,
+      },
+    });
+    if (!cartItems) {
+      throw new ResponseError(400, "there are no any item in your cart");
+    }
+    return cartItems;
+  }
 }

@@ -15,6 +15,7 @@ export class CartRouter {
     this.router.post("/add", this.cartController.addCartItem);
     this.router.patch("/update", this.cartController.udpateCartItem);
     this.router.patch("/select", this.cartController.selectCartItem);
+    this.router.patch("/select-all", this.cartController.selectAllCartitems);
   }
 
   getRouter(): Router {
