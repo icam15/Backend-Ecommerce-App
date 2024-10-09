@@ -1,6 +1,6 @@
 import { ResponseError } from "../helpers/response-error";
 import { prisma } from "../libs/prisma";
-import { AddCartItemPayload } from "../types/cart-types";
+import { AddCartItemPayload, UpdateCartItemPayload } from "../types/cart-types";
 
 export class CartServcie {
   static async createCart(userId: number) {
@@ -91,5 +91,48 @@ export class CartServcie {
       },
     });
     return newCartItem;
+  }
+
+  static async updateCartItem(userId: number, payload: UpdateCartItemPayload) {
+    // find cart user
+    const userCart = await this.findCart(userId);
+
+    // check exist cart item
+    const existCartItem = await prisma.cartItem.findUnique({
+      where: {
+        id: payload.cartItemId,
+      },
+    });
+    if (!existCartItem) {
+      throw new ResponseError(400, "cart item not found");
+    } else if (userCart.id !== existCartItem.id) {
+      throw new ResponseError(400, "you does not have access of this cart");
+    }
+
+    // check exist product and available stock
+    const existProduct = await prisma.product.findUnique({
+      where: {
+        id: existCartItem.productId,
+      },
+      include: { stock: true },
+    });
+    if (!existProduct) {
+      throw new ResponseError(400, "product not found");
+    } else if (!existProduct.stock || existProduct.stock.amount <= 0) {
+      throw new ResponseError(400, "product does not have available stock");
+    } else if (existProduct.stock.amount < payload.quantity) {
+      throw new ResponseError(400, "Insufficient stock available");
+    }
+
+    // update cart item
+    const updateCartItem = await prisma.cartItem.update({
+      where: {
+        id: existCartItem.id,
+      },
+      data: {
+        quantity: existCartItem.quantity + payload.quantity,
+      },
+    });
+    return updateCartItem;
   }
 }

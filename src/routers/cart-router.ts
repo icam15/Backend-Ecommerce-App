@@ -13,6 +13,7 @@ export class CartRouter {
   private InitializeRoute() {
     this.router.get("/", this.cartController.getCart);
     this.router.post("/add", this.cartController.addCartItem);
+    this.router.patch("/update", this.cartController.udpateCartItem);
   }
 
   getRouter(): Router {
