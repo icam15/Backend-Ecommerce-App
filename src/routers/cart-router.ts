@@ -12,6 +12,7 @@ export class CartRouter {
 
   private InitializeRoute() {
     this.router.get("/", this.cartController.getCart);
+    this.router.post("/add", this.cartController.addCartItem);
   }
 
   getRouter(): Router {
