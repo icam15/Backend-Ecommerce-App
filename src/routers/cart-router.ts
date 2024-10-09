@@ -7,5 +7,14 @@ export class CartRouter {
   constructor() {
     this.router = Router();
     this.cartController = new CartController();
+    this.InitializeRoute();
+  }
+
+  private InitializeRoute() {
+    this.router.get("/", this.cartController.getCart);
+  }
+
+  getRouter(): Router {
+    return this.router;
   }
 }
