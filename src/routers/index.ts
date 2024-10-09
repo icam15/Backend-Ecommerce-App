@@ -7,6 +7,7 @@ import { CategoryRouter } from "./category-router";
 import { StoreRouter } from "./store-router";
 import { ProductRouter } from "./product-router";
 import { EtalaseRouter } from "./etalase-router";
+import { CartRouter } from "./cart-router";
 
 export class RootRouter {
   private router: Router;
@@ -17,6 +18,7 @@ export class RootRouter {
   private storeRouter: StoreRouter;
   private productRouter: ProductRouter;
   private etalaseRouter: EtalaseRouter;
+  private cartRouter: CartRouter;
   constructor() {
     this.router = Router();
     this.authRouter = new AuthRouter();
@@ -26,6 +28,7 @@ export class RootRouter {
     this.storeRouter = new StoreRouter();
     this.productRouter = new ProductRouter();
     this.etalaseRouter = new EtalaseRouter();
+    this.cartRouter = new CartRouter();
     this.initializeRouter();
   }
   private initializeRouter(): void {
@@ -52,6 +55,7 @@ export class RootRouter {
       authenticationUser,
       this.etalaseRouter.getRouter()
     );
+    this.router.use("/cart", authenticationUser, this.cartRouter.getRouter());
   }
   getRouter() {
     return this.router;
