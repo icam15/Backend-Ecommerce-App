@@ -3,6 +3,7 @@ import { prisma } from "../libs/prisma";
 import {
   AddCartItemPayload,
   SelectCartItemPayload,
+  SelectCartItemsByStorePayload,
   UpdateCartItemPayload,
 } from "../types/cart-types";
 
@@ -92,6 +93,7 @@ export class CartServcie {
         cartId: cart.id,
         quantity: Number(payload.quantity),
         productId: findProductItem.id,
+        storeId: findProductItem.storeId,
       },
     });
     return newCartItem;
@@ -166,5 +168,75 @@ export class CartServcie {
       },
     });
     return selectCartItem;
+  }
+
+  static async selectAllCartItems(userId: number, isSelected: boolean) {
+    // get cart user
+    const userCart = await this.findCart(userId);
+
+    // select all items in the cart
+    const cartItems = await prisma.cartItem.updateMany({
+      where: {
+        cartId: userCart.id,
+      },
+      data: {
+        isSelected: isSelected,
+      },
+    });
+    if (!cartItems) {
+      throw new ResponseError(400, "there are no any item in your cart");
+    }
+    return cartItems;
+  }
+
+  static async selectCartItemsByStore(
+    userId: number,
+    payload: SelectCartItemsByStorePayload
+  ) {
+    // get cart user
+    const userCart = await this.findCart(userId);
+
+    // select items in the cart by store
+    const cartItemsByStore = await prisma.cartItem.updateMany({
+      where: {
+        cartId: userCart.id,
+        storeId: payload.storeId,
+      },
+      data: {
+        isSelected: payload.isSelected,
+      },
+    });
+    if (!cartItemsByStore) {
+      throw new ResponseError(
+        400,
+        "there are no any item by the store in your cart"
+      );
+    }
+    return cartItemsByStore;
+  }
+
+  static async deleteCartItem(userId: number, cartItemId: number) {
+    // get user cart
+    const userCart = await this.findCart(userId);
+
+    // exist Cart item
+    const existCartItem = await prisma.cartItem.findUnique({
+      where: {
+        id: cartItemId,
+        cartId: userCart.id,
+      },
+    });
+    if (!existCartItem) {
+      throw new ResponseError(400, "cart item not found");
+    }
+
+    // delet cart item
+    const deleteCart = await prisma.cartItem.findUnique({
+      where: {
+        id: cartItemId,
+        cartId: userCart.id,
+      },
+    });
+    return deleteCart;
   }
 }
