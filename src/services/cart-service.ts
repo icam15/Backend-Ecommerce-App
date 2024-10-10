@@ -214,4 +214,29 @@ export class CartServcie {
     }
     return cartItemsByStore;
   }
+
+  static async deleteCartItem(userId: number, cartItemId: number) {
+    // get user cart
+    const userCart = await this.findCart(userId);
+
+    // exist Cart item
+    const existCartItem = await prisma.cartItem.findUnique({
+      where: {
+        id: cartItemId,
+        cartId: userCart.id,
+      },
+    });
+    if (!existCartItem) {
+      throw new ResponseError(400, "cart item not found");
+    }
+
+    // delet cart item
+    const deleteCart = await prisma.cartItem.findUnique({
+      where: {
+        id: cartItemId,
+        cartId: userCart.id,
+      },
+    });
+    return deleteCart;
+  }
 }

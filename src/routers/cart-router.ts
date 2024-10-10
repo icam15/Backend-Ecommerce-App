@@ -11,7 +11,7 @@ export class CartRouter {
   }
 
   private InitializeRoute() {
-    this.router.get("/", this.cartController.getCart);
+    this.router.get("/items", this.cartController.getCart);
     this.router.post("/add", this.cartController.addCartItem);
     this.router.patch("/update", this.cartController.udpateCartItem);
     this.router.patch("/select", this.cartController.selectCartItem);
@@ -20,6 +20,7 @@ export class CartRouter {
       "/select-by-store",
       this.cartController.selectCartItemsByStore
     );
+    this.router.delete("/items/:itemId", this.cartController.deleteCartItem);
   }
 
   getRouter(): Router {
