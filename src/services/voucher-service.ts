@@ -137,4 +137,16 @@ export class VoucherService {
     });
     return newStoreVoucer;
   }
+
+  static async getVoucher(voucherId: number) {
+    const findVoucher = await prisma.voucher.findUnique({
+      where: {
+        id: voucherId,
+      },
+    });
+    if (!findVoucher) {
+      throw new ResponseError(400, "voucher not found");
+    }
+    return findVoucher;
+  }
 }

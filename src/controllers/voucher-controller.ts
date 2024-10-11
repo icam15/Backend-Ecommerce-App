@@ -61,4 +61,22 @@ export class voucherController {
       next(e);
     }
   }
+
+  async getVoucher(
+    req: Request<{ voucherId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { voucherId } = req.params;
+      const result = await VoucherService.getVoucher(Number(voucherId));
+      res.status(201).json({
+        status: "success",
+        message: "get voucher is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

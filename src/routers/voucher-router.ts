@@ -30,6 +30,7 @@ export class VoucherRouter {
       convertFieldToInteger(fieldConvert),
       this.voucherController.createStoreVoucher
     );
+    this.router.get("/:voucherId", this.voucherController.getVoucher);
   }
 
   getRouter(): Router {
