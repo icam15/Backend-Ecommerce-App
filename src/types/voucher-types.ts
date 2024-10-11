@@ -9,3 +9,12 @@ export type CreateVoucherPayload = {
   code?: string;
   stock: number;
 };
+
+export type UpdateVoucherPayload = {
+  discount?: number;
+  isClaimable?: string;
+  minOrderItem?: number;
+  minOrderPrice?: number;
+  code?: string;
+  stock?: number;
+};

@@ -31,6 +31,11 @@ export class VoucherRouter {
       this.voucherController.createStoreVoucher
     );
     this.router.get("/:voucherId", this.voucherController.getVoucher);
+    this.router.patch(
+      "/:voucherId/ecommerce",
+      Authorization.ecommerceAdmin,
+      this.voucherController.updateEcommerceVoucherDate
+    );
   }
 
   getRouter(): Router {

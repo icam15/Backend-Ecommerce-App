@@ -1,7 +1,10 @@
 import { playgrouping } from "googleapis/build/src/apis/playgrouping";
 import { ResponseError } from "../helpers/response-error";
 import { prisma } from "../libs/prisma";
-import { CreateVoucherPayload } from "../types/voucher-types";
+import {
+  CreateVoucherPayload,
+  UpdateVoucherPayload,
+} from "../types/voucher-types";
 import { decode } from "base64-arraybuffer";
 import { getUrlImageFromBucket, uploadImageToBucket } from "../utils/supabase";
 import dayjs from "dayjs";
@@ -31,6 +34,18 @@ export class VoucherService {
       throw new ResponseError(400, "admin store not found");
     }
     return findAdmin;
+  }
+
+  static async checkExistVoucher(voucherId: number) {
+    const findVoucher = await prisma.voucher.findUnique({
+      where: {
+        id: voucherId,
+      },
+    });
+    if (!findVoucher) {
+      throw new ResponseError(400, "voucher not found");
+    }
+    return findVoucher;
   }
 
   static async createEcommerceVoucher(
@@ -148,5 +163,48 @@ export class VoucherService {
       throw new ResponseError(400, "voucher not found");
     }
     return findVoucher;
+  }
+
+  static async updateEcommerceVoucherData(
+    userId: number,
+    voucherId: number,
+    payload: UpdateVoucherPayload
+  ) {
+    // check valid ecommerce admin
+    await this.findEcommerceAdmin(userId);
+
+    // check exist voucher
+    const existVoucher = await this.checkExistVoucher(voucherId);
+    if (existVoucher.ecommerceAdminId === null) {
+      throw new ResponseError(400, "this voucher is not ecommerce voucher");
+    }
+
+    // validate if voucher percent type
+    if (
+      existVoucher.discountType === "PERCENT_DISCOUNT" &&
+      payload.discount! > 100
+    ) {
+      throw new ResponseError(
+        400,
+        "new discount more than limit for percent voucher type"
+      );
+    }
+
+    // update voucher
+    const isClaimable = payload.isClaimable?.toLowerCase() === "true";
+    const updateVoucher = await prisma.voucher.update({
+      where: {
+        id: voucherId,
+      },
+      data: {
+        discount: payload.discount ?? existVoucher.discount,
+        isClaimable: isClaimable ?? existVoucher.isClaimable,
+        minOrderItem: payload.minOrderItem ?? existVoucher.minOrderItem,
+        minOrderPrice: payload.minOrderPrice ?? existVoucher.minOrderPrice,
+        code: payload.code ?? existVoucher.code,
+        stock: payload.stock ?? existVoucher.stock,
+      },
+    });
+    return updateVoucher;
   }
 }

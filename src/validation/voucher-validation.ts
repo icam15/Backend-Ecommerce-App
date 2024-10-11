@@ -13,4 +13,13 @@ export class VoucherValidation {
     code: z.string().optional(),
     stock: z.number().min(1),
   });
+
+  static readonly updateVoucherValidation = z.object({
+    discount: z.number().min(0).optional(),
+    isClaimable: z.enum(["true", "false"]).optional(),
+    minOrderItem: z.number().min(1).optional(),
+    minOrderPrice: z.number().min(0).optional(),
+    code: z.string().optional(),
+    stock: z.number().optional(),
+  });
 }
