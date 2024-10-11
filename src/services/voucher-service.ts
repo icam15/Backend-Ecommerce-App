@@ -207,4 +207,47 @@ export class VoucherService {
     });
     return updateVoucher;
   }
+
+  static async updateStoreVoucherData(
+    userId: number,
+    voucherId: number,
+    payload: UpdateVoucherPayload
+  ) {
+    // check exist voucher
+    const existVoucher = await this.checkExistVoucher(voucherId);
+
+    // check valid admin store
+    const storeAdmin = await this.findStoreAdmin(userId);
+    if (existVoucher.storeId !== storeAdmin.storeId) {
+      throw new ResponseError(400, "you does not have access of this voucher");
+    }
+
+    // validate discount payload if the voucher is PERCENT_TYPE
+    if (
+      existVoucher.discountType === "PERCENT_DISCOUNT" &&
+      payload.discount! > 100
+    ) {
+      throw new ResponseError(
+        400,
+        "new discount more than limit for percent voucher type"
+      );
+    }
+
+    // update store voucher data
+    const isClaimable = payload.isClaimable?.toLowerCase() === "true";
+    const updateVoucher = await prisma.voucher.update({
+      where: {
+        id: voucherId,
+      },
+      data: {
+        discount: payload.discount ?? existVoucher.discount,
+        isClaimable,
+        minOrderItem: payload.minOrderItem ?? existVoucher.minOrderItem,
+        minOrderPrice: payload.minOrderPrice ?? existVoucher.minOrderPrice,
+        code: payload.code ?? existVoucher.code,
+        stock: payload.stock ?? existVoucher.stock,
+      },
+    });
+    return updateVoucher;
+  }
 }

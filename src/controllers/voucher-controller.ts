@@ -109,4 +109,31 @@ export class voucherController {
       next(e);
     }
   }
+
+  async updateStoreVoucherData(
+    req: Request<{ voucherId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { voucherId } = req.params;
+      const payload = validate(
+        VoucherValidation.updateVoucherValidation,
+        req.body as UpdateVoucherPayload
+      );
+      const result = await VoucherService.updateStoreVoucherData(
+        session.id,
+        Number(voucherId),
+        payload
+      );
+      res.status(201).json({
+        status: "success",
+        message: "update store voucher is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
