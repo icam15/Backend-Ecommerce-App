@@ -1,7 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { validate } from "../validation/validation";
 import { VoucherValidation } from "../validation/voucher-validation";
-import { CreateVoucherPayload } from "../types/voucher-types";
+import {
+  CreateVoucherPayload,
+  UpdateVoucherPayload,
+} from "../types/voucher-types";
 import { ResponseError } from "../helpers/response-error";
 import { VoucherService } from "../services/voucher-service";
 
@@ -73,6 +76,60 @@ export class voucherController {
       res.status(201).json({
         status: "success",
         message: "get voucher is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async updateEcommerceVoucherDate(
+    req: Request<{ voucherId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { voucherId } = req.params;
+      const payload = validate(
+        VoucherValidation.updateVoucherValidation,
+        req.body as UpdateVoucherPayload
+      );
+      const result = await VoucherService.updateEcommerceVoucherData(
+        session.id,
+        Number(voucherId),
+        payload
+      );
+      res.status(201).json({
+        status: "success",
+        message: "udpate general voucher is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async updateStoreVoucherData(
+    req: Request<{ voucherId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { voucherId } = req.params;
+      const payload = validate(
+        VoucherValidation.updateVoucherValidation,
+        req.body as UpdateVoucherPayload
+      );
+      const result = await VoucherService.updateStoreVoucherData(
+        session.id,
+        Number(voucherId),
+        payload
+      );
+      res.status(201).json({
+        status: "success",
+        message: "update store voucher is success",
         result,
       });
     } catch (e) {
