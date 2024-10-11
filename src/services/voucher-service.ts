@@ -8,17 +8,29 @@ import dayjs from "dayjs";
 
 export class VoucherService {
   static async findEcommerceAdmin(userId: number) {
-    const findEcommerceAdmin = await prisma.user.findUnique({
+    const findAdmin = await prisma.user.findUnique({
       where: {
         id: userId,
       },
     });
-    if (!findEcommerceAdmin) {
+    if (!findAdmin) {
       throw new ResponseError(400, "ecommerce admin not found");
-    } else if (findEcommerceAdmin.role !== "ECOMMERCEADMIN") {
+    } else if (findAdmin.role !== "ECOMMERCEADMIN") {
       throw new ResponseError(400, "you are not ecommerce admin");
     }
-    return findEcommerceAdmin;
+    return findAdmin;
+  }
+
+  static async findStoreAdmin(userId: number) {
+    const findAdmin = await prisma.storeAdmin.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!findAdmin) {
+      throw new ResponseError(400, "admin store not found");
+    }
+    return findAdmin;
   }
 
   static async createEcommerceVoucher(
@@ -70,5 +82,59 @@ export class VoucherService {
       },
     });
     return newEcommerceVoucher;
+  }
+
+  static async createStoreVoucher(
+    userId: number,
+    image: Express.Multer.File,
+    payload: CreateVoucherPayload
+  ) {
+    // check valid store admin
+    const storeAdmin = await this.findStoreAdmin(userId);
+
+    // validate voucher type percent with payload discount
+    if (payload.discountType === "PERCENT_DISCOUNT" && payload.discount > 100) {
+      throw new ResponseError(
+        400,
+        "payload discount more than limit for percent voucher type "
+      );
+    }
+    // upload image to bucket
+    // decode file buffer to string base64 encoding and then decode base 64 to array buffer
+    const base64Image = image.buffer.toString("base64");
+    const arrayBufferImage = decode(base64Image);
+
+    // upload image to bucket
+    const originalFileName = image.originalname.split(".");
+    const fileExt = originalFileName[originalFileName.length - 1].toLowerCase();
+    const filePath = `${storeAdmin.storeId}-voucher-${Date.now()}.${fileExt}`;
+    const { err } = await uploadImageToBucket(filePath, arrayBufferImage);
+    if (err) {
+      throw new ResponseError(400, err.message);
+    }
+    // get url image from bucket
+    const { imageUrl } = await getUrlImageFromBucket(filePath);
+
+    // create store voucher
+    const isClaimable = payload.isClaimable.toLowerCase() === "true";
+    const expireVoucher = dayjs().add(7, "day").toDate();
+    const newStoreVoucer = await prisma.voucher.create({
+      data: {
+        discount: payload.discount,
+        discountType: payload.discountType,
+        imageUrl,
+        isClaimable,
+        name: payload.name,
+        stock: payload.stock,
+        voucherType: payload.voucherType,
+        storeAdminId: storeAdmin.id,
+        code: payload.code,
+        minOrderItem: payload.minOrderItem,
+        minOrderPrice: payload.minOrderPrice,
+        expireAt: expireVoucher,
+        storeId: storeAdmin.storeId,
+      },
+    });
+    return newStoreVoucer;
   }
 }

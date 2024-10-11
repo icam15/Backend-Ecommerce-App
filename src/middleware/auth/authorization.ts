@@ -6,7 +6,10 @@ export class Authorization {
     try {
       const user = req.user;
       if (user.role !== "STOREADMIN") {
-        throw new ResponseError(403, "Unauthorization access");
+        throw new ResponseError(
+          403,
+          "Required store admin role access. Access denied"
+        );
       }
       next();
     } catch (e) {
@@ -21,7 +24,10 @@ export class Authorization {
     try {
       const user = req.user;
       if (user.role !== "ECOMMERCEADMIN") {
-        throw new ResponseError(403, "Unauthorization access");
+        throw new ResponseError(
+          403,
+          "Required ecommerce admin role access. Access denied"
+        );
       }
       next();
     } catch (e) {

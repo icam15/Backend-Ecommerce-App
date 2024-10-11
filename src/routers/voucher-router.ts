@@ -23,6 +23,13 @@ export class VoucherRouter {
       convertFieldToInteger(fieldConvert),
       this.voucherController.createEcommerceVoucher
     );
+    this.router.post(
+      "/store",
+      Authorization.storeAdmin,
+      uploadFile.single("image-voucher"),
+      convertFieldToInteger(fieldConvert),
+      this.voucherController.createStoreVoucher
+    );
   }
 
   getRouter(): Router {
