@@ -35,4 +35,48 @@ export class voucherController {
       next(e);
     }
   }
+
+  async createStoreVoucher(req: Request, res: Response, next: NextFunction) {
+    try {
+      const session = req.user;
+      const imageVoucher = req.file;
+      if (!imageVoucher) {
+        throw new ResponseError(400, "required image voucher");
+      }
+      const payload = validate(
+        VoucherValidation.createVoucherValidation,
+        req.body as CreateVoucherPayload
+      );
+      const result = await VoucherService.createStoreVoucher(
+        session.id,
+        imageVoucher,
+        payload
+      );
+      res.status(201).json({
+        status: "success",
+        message: "create store voucher is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async getVoucher(
+    req: Request<{ voucherId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { voucherId } = req.params;
+      const result = await VoucherService.getVoucher(Number(voucherId));
+      res.status(201).json({
+        status: "success",
+        message: "get voucher is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
