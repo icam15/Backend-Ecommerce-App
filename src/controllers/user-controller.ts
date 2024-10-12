@@ -68,4 +68,18 @@ export class UserController {
       next(e);
     }
   }
+
+  async getUserVouchers(req: Request, res: Response, next: NextFunction) {
+    try {
+      const session = req.user;
+      const result = await UserService.getUserVouchers(session.id);
+      res.status(201).json({
+        status: "success",
+        message: "get user voucher is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

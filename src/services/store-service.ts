@@ -352,4 +352,16 @@ export class StoreService {
     }
     return productsByEtalase;
   }
+
+  static async getStoreVouchers(storeId: number) {
+    const findStoreVouchers = await prisma.voucher.findMany({
+      where: {
+        storeId,
+      },
+    });
+    if (!findStoreVouchers) {
+      throw new ResponseError(400, "store does not have any vouchers");
+    }
+    return findStoreVouchers;
+  }
 }
