@@ -250,4 +250,42 @@ export class VoucherService {
     });
     return updateVoucher;
   }
+
+  static async deleteEcommerceVoucher(userId: number, voucherId: number) {
+    // check exist voucher
+    const existVoucher = await this.checkExistVoucher(voucherId);
+    // check valid ecomerce voucher
+    const ecommerceAdmin = await this.findEcommerceAdmin(userId);
+
+    if (!existVoucher.ecommerceAdminId) {
+      throw new ResponseError(400, "voucher is not type of ecommerce voucher");
+    } else if (existVoucher.ecommerceAdminId !== ecommerceAdmin.id) {
+      throw new ResponseError(400, "you does not have acces of this resources");
+    }
+
+    // delete voucher
+    await prisma.voucher.delete({
+      where: {
+        id: voucherId,
+      },
+    });
+  }
+
+  static async deleteStoreVoucher(userId: number, voucherId: number) {
+    // check exist voucher
+    const existVoucher = await this.checkExistVoucher(voucherId);
+
+    // check valid store admin
+    const storeAdmin = await this.findStoreAdmin(userId);
+    if (storeAdmin.id !== existVoucher.storeAdminId) {
+      throw new ResponseError(400, "you does not have access of this voucher");
+    }
+
+    // delete voucher
+    await prisma.voucher.delete({
+      where: {
+        id: voucherId,
+      },
+    });
+  }
 }

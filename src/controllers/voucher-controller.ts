@@ -136,4 +136,43 @@ export class voucherController {
       next(e);
     }
   }
+
+  async deleteEcommerceVoucher(
+    req: Request<{ voucherId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { voucherId } = req.params;
+      await VoucherService.deleteEcommerceVoucher(
+        session.id,
+        Number(voucherId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "delete ecommerce voucher is success",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async deleteStoreVoucher(
+    req: Request<{ voucherId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { voucherId } = req.params;
+      await VoucherService.deleteStoreVoucher(session.id, Number(voucherId));
+      res.status(201).json({
+        status: "success",
+        message: "delete store voucher is success",
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
