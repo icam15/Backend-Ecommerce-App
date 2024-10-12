@@ -228,4 +228,22 @@ export class StoreController {
       next(e);
     }
   }
+
+  async getStoreVouchers(
+    req: Request<{ storeId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { storeId } = req.params;
+      const result = await StoreService.getStoreVouchers(Number(storeId));
+      res.status(201).json({
+        status: "success",
+        message: "get store vouchers is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
