@@ -32,7 +32,6 @@ export class RootRouter {
     this.etalaseRouter = new EtalaseRouter();
     this.cartRouter = new CartRouter();
     this.voucherRouter = new VoucherRouter();
-
     this.initializeRouter();
   }
   private initializeRouter(): void {
