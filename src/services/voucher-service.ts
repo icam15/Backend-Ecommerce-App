@@ -288,4 +288,23 @@ export class VoucherService {
       },
     });
   }
+
+  static async claimVoucher(userId: number, voucherId: number) {
+    // check exist voucher and check claimable voucher
+    const existVoucher = await this.checkExistVoucher(voucherId);
+    if (!existVoucher.isClaimable) {
+      throw new ResponseError(400, "voucher is not claimable");
+    }
+
+    // assign voucher to user
+    const userVoucher = await prisma.userVoucher.create({
+      data: {
+        userId,
+        voucherId,
+        isUsed: false,
+        expireAt: existVoucher.expireAt,
+      },
+    });
+    return userVoucher;
+  }
 }

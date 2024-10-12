@@ -51,6 +51,7 @@ export class VoucherRouter {
       Authorization.storeAdmin,
       this.voucherController.deleteStoreVoucher
     );
+    this.router.post("/:voucherId/claim", this.voucherController.claimVoucher);
   }
 
   getRouter(): Router {

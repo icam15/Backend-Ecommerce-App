@@ -335,8 +335,8 @@ model UserVoucher {
   voucherId Int @map("voucher_id")
   isUsed Boolean @map("is_used")
   expireAt DateTime @map("expire_at")
-  createAt DateTime @map("create_at")
-  updateAt DateTime @map("update_at")
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
 
   // Relation 
   user User @relation(fields: [userId], references: [id])

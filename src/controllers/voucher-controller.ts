@@ -175,4 +175,26 @@ export class voucherController {
       next(e);
     }
   }
+
+  async claimVoucher(
+    req: Request<{ voucherId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { voucherId } = req.params;
+      const result = await VoucherService.claimVoucher(
+        session.id,
+        Number(voucherId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "claim voucher is success",
+      });
+      result;
+    } catch (e) {
+      next(e);
+    }
+  }
 }
