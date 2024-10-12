@@ -22,4 +22,9 @@ export class VoucherValidation {
     code: z.string().optional(),
     stock: z.number().optional(),
   });
+
+  static readonly assignVoucherValidation = z.object({
+    voucherId: z.number(),
+    toUserId: z.number(),
+  });
 }

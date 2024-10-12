@@ -2,6 +2,7 @@ import { playgrouping } from "googleapis/build/src/apis/playgrouping";
 import { ResponseError } from "../helpers/response-error";
 import { prisma } from "../libs/prisma";
 import {
+  AssignVoucherPayload,
   CreateVoucherPayload,
   UpdateVoucherPayload,
 } from "../types/voucher-types";
@@ -306,5 +307,44 @@ export class VoucherService {
       },
     });
     return userVoucher;
+  }
+
+  static async assignVoucherToUser(
+    userId: number,
+    payload: AssignVoucherPayload
+  ) {
+    // check exist voucher
+    const existVoucher = await this.checkExistVoucher(payload.voucherId);
+
+    // check if voucher is ecomerce voucher
+    if (
+      existVoucher.ecommerceAdminId &&
+      existVoucher.ecommerceAdminId !== userId
+    ) {
+      throw new ResponseError(
+        400,
+        "you does not have access of this voucher ..."
+      );
+    }
+
+    // check if voucher is store voucher
+    const storeAdmin = await this.findStoreAdmin(userId);
+    if (
+      existVoucher.storeAdminId &&
+      existVoucher.storeId !== storeAdmin.storeId
+    ) {
+      throw new ResponseError(400, "you does not have access of this voucher");
+    }
+
+    // assign voucher to user
+    const assignVoucher = await prisma.userVoucher.create({
+      data: {
+        userId,
+        isUsed: false,
+        voucherId: payload.voucherId,
+        expireAt: existVoucher.expireAt,
+      },
+    });
+    return assignVoucher;
   }
 }

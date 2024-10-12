@@ -52,6 +52,11 @@ export class VoucherRouter {
       this.voucherController.deleteStoreVoucher
     );
     this.router.post("/:voucherId/claim", this.voucherController.claimVoucher);
+    this.router.post(
+      "/assign",
+      Authorization.allAdmins,
+      this.voucherController.assignVoucherToUser
+    );
   }
 
   getRouter(): Router {

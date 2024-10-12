@@ -18,3 +18,8 @@ export type UpdateVoucherPayload = {
   code?: string;
   stock?: number;
 };
+
+export type AssignVoucherPayload = {
+  voucherId: number;
+  toUserId: number;
+};

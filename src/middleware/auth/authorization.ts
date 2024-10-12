@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ResponseError } from "../../helpers/response-error";
 import { AuthJwtPayload } from "../../types/auth-types";
+import { logger } from "../../libs/logger";
 
 export class Authorization {
   public static storeAdmin(req: Request, res: Response, next: NextFunction) {
@@ -38,8 +39,10 @@ export class Authorization {
 
   public static allAdmins(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = res.locals.session as AuthJwtPayload;
-      if (user.role !== "STOREADMIN" || "ECOMMERCEADMIN") {
+      const user = req.user;
+      const validAdmin = ["STOREADMIN", "ECOMMERCEADMIN"];
+      console.log(user);
+      if (!validAdmin.includes(user.role)) {
         throw new ResponseError(
           400,
           "Access Denied, required either ecommerce admin or store admin role."

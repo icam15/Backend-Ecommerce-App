@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { validate } from "../validation/validation";
 import { VoucherValidation } from "../validation/voucher-validation";
 import {
+  AssignVoucherPayload,
   CreateVoucherPayload,
   UpdateVoucherPayload,
 } from "../types/voucher-types";
@@ -193,6 +194,27 @@ export class voucherController {
         message: "claim voucher is success",
       });
       result;
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async assignVoucherToUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const session = req.user;
+      const payload = validate(
+        VoucherValidation.assignVoucherValidation,
+        req.body as AssignVoucherPayload
+      );
+      const result = await VoucherService.assignVoucherToUser(
+        session.id,
+        payload
+      );
+      res.status(201).json({
+        status: "success",
+        message: "assign voucher to user is success",
+        result,
+      });
     } catch (e) {
       next(e);
     }
