@@ -340,7 +340,7 @@ model UserVoucher {
 
   // Relation 
   user User @relation(fields: [userId], references: [id])
-  voucher Voucher @relation(fields: [voucherId], references: [id])
+  voucher Voucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
 
 
   @@map("user_voucher")
