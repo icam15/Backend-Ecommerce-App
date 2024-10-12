@@ -109,4 +109,18 @@ export class UserService {
       },
     });
   }
+
+  static async getUserVouchers(userId: number) {
+    const findUserVouchers = await prisma.userVoucher.findMany({
+      where: {
+        userId,
+      },
+      include: { voucher: true },
+    });
+    if (!findUserVouchers) {
+      throw new ResponseError(400, "user does not any voucher");
+    }
+
+    return findUserVouchers;
+  }
 }

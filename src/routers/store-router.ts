@@ -59,6 +59,10 @@ export class StoreRouter {
       "/:storeId/etalases",
       this.storeController.getStoreEtalases
     );
+    this.router.get(
+      "/:storeId/vouchers",
+      this.storeController.getStoreVouchers
+    );
   }
   getRouter(): Router {
     return this.router;

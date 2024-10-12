@@ -20,6 +20,7 @@ export class UserRouter {
       uploadFile.single("file"),
       this.userController.updateImage
     );
+    this.router.get("/vouchers", this.userController.getUserVouchers);
   }
 
   getRouter(): Router {

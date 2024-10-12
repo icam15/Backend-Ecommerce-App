@@ -35,6 +35,16 @@ enum CityType {
   KOTA
 }
 
+enum VoucherType {
+  PRODUCT_PRICE
+  SHIPPING_COST
+}
+
+enum DiscountType {
+  FIXED_DISCOUNT
+  PERCENT_DISCOUNT
+}
+
 model User{
   id Int @id @default(autoincrement())
   email String @unique
@@ -45,15 +55,18 @@ model User{
   isVerified UserStatus @default(UNVERIFIED)
   phoneNumber String? @map("phone_number")
  
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt 
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt
 
   //Relation
+  cart Cart?
   storeAdmin StoreAdmin[]
   userToken UserToken?
   categories Category[]
   address Address[]
   store Store?
+  voucher Voucher[]
+  userVoucher UserVoucher[]
 }
 
 model UserToken{
@@ -84,8 +97,8 @@ model Address {
   provinceId Int 
   longitude Float
   latitude Float
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
 
   // Relation
   user User @relation(fields: [userId], references: [id])
@@ -100,7 +113,6 @@ model City {
   name String
   cityType CityType @map("city_type")
   provinceId Int 
-
 
   // Relation
   province Province @relation(fields: [provinceId], references: [id])
@@ -161,6 +173,8 @@ model Store{
   product Product[]
   stock Stock[]
   storeEtalase StoreEtalase[]
+  cartItem CartItem[]
+  voucher Voucher[]
 
   @@map("store")
 }
@@ -177,6 +191,7 @@ model StoreAdmin {
   // Relation
   user User @relation(fields: [userId], references: [id])
   store Store @relation(fields: [storeId], references: [id] , onDelete: Cascade)
+  voucher Voucher[]
 }
 
 model Product {
@@ -199,6 +214,7 @@ model Product {
   storeEtalase StoreEtalase? @relation(fields: [storeEtalaseId], references: [id])
   productImage ProductImage[]
   stock Stock?
+  cartItem CartItem[]
   
 
   
@@ -239,10 +255,10 @@ model Stock {
 
 model StoreEtalase {
   id Int @id @default(autoincrement())
-  storeId Int
+  storeId Int 
   name String
   iconUrl String @map("icon_url")
-  createAt DateTime @default(now())
+  createAt DateTime @default(now()) @map("create_at")
   updateAt DateTime @updatedAt 
 
   // relation
@@ -250,6 +266,84 @@ model StoreEtalase {
   product Product[]
 
   @@map("store_etalase")
+}
+
+model Cart {
+  id Int @id @default(autoincrement())
+  userId Int @unique @map("user_id")
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
+
+  // Relation
+  user User @relation(fields: [userId], references: [id])
+  cartItem CartItem[]
+
+  @@map("cart")
+}
+
+model CartItem {
+  id Int @id @default(autoincrement())
+  productId Int @map("product_id")
+  cartId Int @map("cart_id")
+  storeId Int @map("store_id")
+  quantity Int
+  isSelected Boolean @default(false) @map("is_selected")
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
+
+  // Relation
+  store Store @relation(fields: [ storeId] ,references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  cart Cart @relation(fields: [cartId], references: [id])
+
+  @@map("cart_item")
+}
+
+
+model Voucher {
+  id Int @id @default(autoincrement())
+  name String 
+  code String? @db.Text
+  imageUrl String @db.Text
+  discount Int 
+  voucherType VoucherType @map("voucher_type")
+  discountType DiscountType @map("discount_type")
+  isClaimable Boolean @map("is_claimable")
+  stock Int 
+  storeId Int? @map("store_id")
+  storeAdminId Int? @map("store_admin_id")
+  ecommerceAdminId Int? @map("ecommerce_admin_id")
+  minOrderItem Int @default(0) @map("min_order_item")
+  minOrderPrice Int @default(0) @map("min_order_price")
+  expireAt DateTime @map("expire_at")
+  createAt DateTime @map("create_at") @default(now())
+  updateAt DateTime @map("update_at") @updatedAt
+
+  // Relation
+  store Store? @relation(fields: [storeId], references: [id])
+  storeAdmin StoreAdmin? @relation(fields: [storeAdminId], references: [id])
+  ecommerceAdmin User? @relation(fields: [ecommerceAdminId], references: [id])
+  userVoucher UserVoucher[]
+
+
+  @@map("voucher")
+}
+
+model UserVoucher {
+  id Int @id @default(autoincrement())
+  userId Int @map("user_id")
+  voucherId Int @map("voucher_id")
+  isUsed Boolean @map("is_used")
+  expireAt DateTime @map("expire_at")
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
+
+  // Relation 
+  user User @relation(fields: [userId], references: [id])
+  voucher Voucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+
+
+  @@map("user_voucher")
 }
 
 
