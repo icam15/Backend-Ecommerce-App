@@ -250,4 +250,22 @@ export class VoucherService {
     });
     return updateVoucher;
   }
+
+  static async deleteEcommerceVoucher(userId: number, voucherId: number) {
+    // check exist voucher
+    const existVoucher = await this.checkExistVoucher(voucherId);
+    if (!existVoucher.ecommerceAdminId) {
+      throw new ResponseError(400, "voucher is not type of ecommerce voucher");
+    }
+
+    // check valid ecomerce voucher
+    await this.findEcommerceAdmin(userId);
+
+    // delete voucher
+    await prisma.voucher.delete({
+      where: {
+        id: voucherId,
+      },
+    });
+  }
 }

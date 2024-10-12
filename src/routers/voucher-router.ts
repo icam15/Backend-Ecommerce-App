@@ -41,6 +41,11 @@ export class VoucherRouter {
       Authorization.storeAdmin,
       this.voucherController.updateStoreVoucherData
     );
+    this.router.delete(
+      "/:voucherId/ecommerce",
+      Authorization.ecommerceAdmin,
+      this.voucherController.deleteEcommerceVoucher
+    );
   }
 
   getRouter(): Router {
