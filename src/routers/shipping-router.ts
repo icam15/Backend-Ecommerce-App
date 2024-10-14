@@ -12,6 +12,8 @@ export class ShippingRouter {
 
   private initializeRouter(): void {
     this.router.get("/cities", this.shippingController.getCities);
+    this.router.get("/province", this.shippingController.getProvince);
+    this.router.post("/cost", this.shippingController.getShippingCost);
   }
 
   getRoute(): Router {
