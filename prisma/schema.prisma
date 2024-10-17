@@ -175,6 +175,7 @@ model Store{
   storeEtalase StoreEtalase[]
   cartItem CartItem[]
   voucher Voucher[]
+  orderStore OrderStore[]
 
   @@map("store")
 }
@@ -324,6 +325,7 @@ model Voucher {
   storeAdmin StoreAdmin? @relation(fields: [storeAdminId], references: [id])
   ecommerceAdmin User? @relation(fields: [ecommerceAdminId], references: [id])
   userVoucher UserVoucher[]
+  orderStore OrderStore[]
 
 
   @@map("voucher")
@@ -344,6 +346,39 @@ model UserVoucher {
 
 
   @@map("user_voucher")
+}
+
+model OrderStore {
+ id Int @id @default(autoincrement())
+ storeId Int @map("store_id")
+ orderId Int @map("order_id")
+ discountStore Int @map("discount_store") 
+ storeVoucherId Int @map("store_voucher_id")
+ totalPrice Int  @map("total_price")
+
+ createAt DateTime @default(now()) @map("create_at")
+ updateAt DateTime @updatedAt @map("update_at")
+
+ // Relation
+ voucher Voucher @relation(fields: [storeVoucherId], references: [id])
+ store Store @relation(fields: [storeId], references: [id])
+ orderItem OrderItem[]
+
+ @@map("order_store")
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+  productId Int @map("product_id")
+  orderStoreId Int @map("order_store_id")
+  quantity Int 
+
+  // Relation 
+  orderStore OrderStore @relation(fields: [orderStoreId], references: [id])
+
+
+  @@map("order_item")
+
 }
 
 
