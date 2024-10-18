@@ -10,7 +10,9 @@ export class OrderRouter {
     this.initializeRouter();
   }
 
-  private initializeRouter() {}
+  private initializeRouter() {
+    this.router.get("/checkout", this.orderController.getCheckoutCart);
+  }
   getRouter(): Router {
     return this.router;
   }
