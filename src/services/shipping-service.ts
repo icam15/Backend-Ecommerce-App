@@ -20,7 +20,7 @@ export class ShippingService {
     return findProvince;
   }
 
-  static async getShippingCost(paylod: GetShippingCostPayload) {
+  static async getShippingCost(payload: GetShippingCostPayload) {
     const url = "https://api.rajaongkir.com/starter/cost";
     const rajaOngkirApiKey = process.env.RAJA_ONGKIR_API_KEY!;
     if (!rajaOngkirApiKey) {
@@ -31,10 +31,10 @@ export class ShippingService {
       "content-type": "application/x-www-form-urlencoded",
     };
     const body = new URLSearchParams({
-      origin: String(paylod.origin),
-      destination: String(paylod.destination),
-      weight: String(paylod.weight),
-      courier: paylod.courier,
+      origin: String(payload.origin),
+      destination: String(payload.destination),
+      weight: String(payload.weight),
+      courier: payload.courier,
     });
 
     const response = await fetch(url, {

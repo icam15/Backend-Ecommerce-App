@@ -94,6 +94,7 @@ export class CartServcie {
         quantity: Number(payload.quantity),
         productId: findProductItem.id,
         storeId: findProductItem.storeId,
+        weight: findProductItem.weight,
       },
     });
     return newCartItem;
