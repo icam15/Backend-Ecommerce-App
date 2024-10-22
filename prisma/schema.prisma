@@ -45,6 +45,21 @@ enum DiscountType {
   PERCENT_DISCOUNT
 }
 
+enum ShippingServiceType {
+  REG
+  SPS
+  YES
+  OKE
+}
+
+enum CourierType {
+  JNE
+  POS
+  SICEPAT
+}
+
+
+
 model User{
   id Int @id @default(autoincrement())
   email String @unique
@@ -363,7 +378,6 @@ enum OrderStatus {
 model Order {
   id Int @id @default(autoincrement())
   userId Int @map("user_id")
-  service String
   estimation String
   note String?
   orderStatus OrderStatus @map("order_status")
@@ -389,6 +403,8 @@ model OrderStore {
  id Int @id @default(autoincrement())
  storeId Int @map("store_id")
  orderId Int @map("order_id")
+ service ShippingServiceType
+ courier CourierType
  discount Int @map("discount_products")
  storeVoucherId Int @map("store_voucher_id")
  shippingCost Int @map("shipping_cost")
