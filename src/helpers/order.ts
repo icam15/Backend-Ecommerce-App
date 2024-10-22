@@ -64,6 +64,7 @@ export const calculateTotalPriceAndWeight = async (cartItems: any) => {
   let totalProductWeight = 0;
   // check stock
   for (const item of cartItems) {
+ 
     const findStock = await prisma.stock.findUnique({
       where: { productId: item.productId },
     });
