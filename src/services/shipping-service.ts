@@ -26,10 +26,14 @@ export class ShippingService {
     if (!rajaOngkirApiKey) {
       throw new ResponseError(500, "raja ongkir api key is not set");
     }
+
+    // create custome header
     const headers = {
       key: rajaOngkirApiKey,
       "content-type": "application/x-www-form-urlencoded",
     };
+
+    // create custome search params
     const body = new URLSearchParams({
       origin: String(payload.origin),
       destination: String(payload.destination),
@@ -50,8 +54,8 @@ export class ShippingService {
     }
     console.log(response.statusText);
     const data = await response.json();
-    const cost = data.rajaongkir.results[0].costs;
+    const costs: [] = data.rajaongkir.results[0].costs;
 
-    return { cost };
+    return costs;
   }
 }
