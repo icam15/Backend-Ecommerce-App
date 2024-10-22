@@ -1,5 +1,6 @@
 import { ResponseError } from "../helpers/response-error";
 import { prisma } from "../libs/prisma";
+import { CalculateOrderPerStorePayload } from "../types/order-types";
 
 export class OrderService {
   static async getCheckoutCart(userId: number) {
@@ -23,5 +24,17 @@ export class OrderService {
     console.log(getSelectedCartItem);
 
     return getSelectedCartItem;
+  }
+
+  static async calculateOrderItemByStore(
+    userId: number,
+    payload: CalculateOrderPerStorePayload
+  ) {
+    // get user main address
+    // get exist store
+    // get cart item selected by the store and check stock
+    // sum all product price
+    // calculate shipping cost with user address and store address
+    // add discount if there is voucher store
   }
 }

@@ -289,6 +289,7 @@ model CartItem {
   cartId Int @map("cart_id")
   storeId Int @map("store_id")
   quantity Int
+  weight Float
   isSelected Boolean @default(false) @map("is_selected")
   createAt DateTime @default(now()) @map("create_at")
   updateAt DateTime @updatedAt @map("update_at")

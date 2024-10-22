@@ -20,21 +20,25 @@ export class ShippingService {
     return findProvince;
   }
 
-  static async getShippingCost(paylod: GetShippingCostPayload) {
+  static async getShippingCost(payload: GetShippingCostPayload) {
     const url = "https://api.rajaongkir.com/starter/cost";
     const rajaOngkirApiKey = process.env.RAJA_ONGKIR_API_KEY!;
     if (!rajaOngkirApiKey) {
       throw new ResponseError(500, "raja ongkir api key is not set");
     }
+
+    // create custome header
     const headers = {
       key: rajaOngkirApiKey,
       "content-type": "application/x-www-form-urlencoded",
     };
+
+    // create custome search params
     const body = new URLSearchParams({
-      origin: String(paylod.origin),
-      destination: String(paylod.destination),
-      weight: String(paylod.weight),
-      courier: paylod.courier,
+      origin: String(payload.origin),
+      destination: String(payload.destination),
+      weight: String(payload.weight),
+      courier: payload.courier,
     });
 
     const response = await fetch(url, {
@@ -50,8 +54,8 @@ export class ShippingService {
     }
     console.log(response.statusText);
     const data = await response.json();
-    const cost = data.rajaongkir.results[0].costs;
+    const costs: [] = data.rajaongkir.results[0].costs;
 
-    return { cost };
+    return costs;
   }
 }
