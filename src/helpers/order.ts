@@ -1,4 +1,4 @@
-import { response } from "express";
+import { Response, response } from "express";
 import { prisma } from "../libs/prisma";
 import { ResponseError } from "./response-error";
 import { Cart, CartItem, Product } from "@prisma/client";
@@ -46,32 +46,38 @@ export const getCartItemsSelectedByStore = async (
     where: {
       cartId: existCart.id,
       isSelected: true,
+      storeId,
     },
     include: { product: true },
   });
+  if (!cartItems) {
+    throw new ResponseError(
+      400,
+      "user cart does not contain items selected by the store"
+    );
+  }
+  return cartItems;
 };
 
-export const calculateTotalPriceAndWeight = async (
-  userId: number,
-  storeId: number,
-  cartItems: []
-) => {
+export const calculateTotalPriceAndWeight = async (cartItems: any) => {
   let totalProductPrice = 0;
   let totalProductWeight = 0;
   // check stock
-  cartItems.map(async (item: any) => {
+  for (const item of cartItems) {
+ 
     const findStock = await prisma.stock.findUnique({
       where: { productId: item.productId },
     });
     if (!findStock) {
       throw new ResponseError(400, "stock not found");
-    } else if (item.quantity > findStock.amount) {
+    }
+    if (item.quantity > findStock!.amount) {
       throw new ResponseError(400, "insufficient product stock");
     }
     totalProductPrice = totalProductPrice + item.quantity * item.product.price;
     totalProductWeight =
       totalProductWeight + item.quantity * item.product.weight;
-  });
+  }
 
   return { totalProductPrice, totalProductWeight, cartItems };
 };
@@ -89,6 +95,7 @@ export const calculateShippingCost = async (
     weight,
     courier,
   });
+  console.log(origin, destination, weight, courier);
 
   const getCostByService: any = costs.filter(
     (cost: any) => cost.service === service.toUpperCase()
@@ -102,7 +109,6 @@ export const applyDiscountVoucherStore = async (
   totalProductsPrice: number,
   userId: number,
   voucherId: number,
-  shippingCost: number,
   itemLength: number,
   storeId?: number
 ) => {

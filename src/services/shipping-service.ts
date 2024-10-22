@@ -49,7 +49,7 @@ export class ShippingService {
     if (!response.ok) {
       throw new ResponseError(
         response.status,
-        "Error get shipping cost from raja ongkir"
+        "Error get shipping cost from raja ongkir" + response.statusText
       );
     }
     console.log(response.statusText);

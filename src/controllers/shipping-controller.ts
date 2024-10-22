@@ -37,7 +37,7 @@ export class ShippingController {
         ShippingValidation.getShippingValidation,
         req.body as GetShippingCostPayload
       );
-      const { cost } = await ShippingService.getShippingCost(payload);
+      const cost = await ShippingService.getShippingCost(payload);
       res.status(201).json({
         status: "success",
         message: "get shipping cost is succes",

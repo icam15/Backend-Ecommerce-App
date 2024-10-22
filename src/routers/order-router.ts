@@ -12,6 +12,10 @@ export class OrderRouter {
 
   private initializeRouter() {
     this.router.get("/checkout", this.orderController.getCheckoutCart);
+    this.router.post(
+      "/calculate-order-by-store",
+      this.orderController.calculateOrderItemsByStore
+    );
   }
   getRouter(): Router {
     return this.router;
