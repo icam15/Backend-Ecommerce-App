@@ -2,7 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import { OrderService } from "../services/order-service";
 import { validate } from "../validation/validation";
 import { OrderValidation } from "../validation/order-validation";
-import { CalculateOrderPerStorePayload } from "../types/order-types";
+import {
+  CalculateOrderPerStorePayload,
+  CreateOrderPayload,
+} from "../types/order-types";
 
 export class OrderController {
   async getCheckoutCart(req: Request, res: Response, next: NextFunction) {
@@ -37,6 +40,24 @@ export class OrderController {
       res.status(201).json({
         status: "success",
         message: "calculate cart items by store is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async createOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const session = req.user;
+      const payload = validate(
+        OrderValidation.createOrderValidation,
+        req.body as CreateOrderPayload
+      );
+      const result = await OrderService.createOrder(session.id, payload);
+      res.status(201).json({
+        status: "success",
+        message: "create new order order is success",
         result,
       });
     } catch (e) {

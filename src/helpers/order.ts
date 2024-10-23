@@ -99,8 +99,10 @@ export const calculateShippingCost = async (
   const getCostByService: any = costs.filter(
     (cost: any) => cost.service === service.toUpperCase()
   );
-  const cost = getCostByService.cost.value;
-  const estimation = getCostByService.cost.etd;
+  console.log(costs);
+  console.log(getCostByService);
+  const cost = getCostByService.cost;
+  const estimation = getCostByService.cost;
   return { cost, estimation };
 };
 

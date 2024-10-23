@@ -9,4 +9,9 @@ export class OrderValidation {
     voucherId: z.string().optional(),
     note: z.string().optional(),
   });
+  static readonly createOrderValidation = z.object({
+    note: z.string().optional(),
+    ecommerceVoucherId: z.number().optional(),
+    orderStore: z.array(this.calculateOrderItemsByStoreValidation).min(1),
+  });
 }
