@@ -3,6 +3,7 @@ import { OrderService } from "../services/order-service";
 import { validate } from "../validation/validation";
 import { OrderValidation } from "../validation/order-validation";
 import {
+  ApplyDiscountVoucherPayload,
   CalculateOrderPerStorePayload,
   CreateOrderPayload,
 } from "../types/order-types";
@@ -40,6 +41,23 @@ export class OrderController {
       res.status(201).json({
         status: "success",
         message: "calculate cart items by store is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async applyDiscountVoucher(req: Request, res: Response, next: NextFunction) {
+    try {
+      const payload = validate(
+        OrderValidation.applyDiscountVoucherValidation,
+        req.body as ApplyDiscountVoucherPayload
+      );
+      const result = await OrderService.applyDiscountVoucher(payload);
+      res.status(201).json({
+        status: "success",
+        message: "get discount voucher is success",
         result,
       });
     } catch (e) {

@@ -14,4 +14,11 @@ export class OrderValidation {
     ecommerceVoucherId: z.number().optional(),
     orderStore: z.array(this.calculateOrderItemsByStoreValidation).min(1),
   });
+
+  static readonly applyDiscountVoucherValidation = z.object({
+    finalProductsPrice: z.number(),
+    finalShippingCost: z.number(),
+    orderItems: z.array(z.number()),
+    voucherId: z.number(),
+  });
 }

@@ -17,6 +17,10 @@ export class OrderRouter {
       this.orderController.calculateOrderItemsByStore
     );
     this.router.post("/add", this.orderController.createOrder);
+    this.router.post(
+      "/apply-voucher",
+      this.orderController.applyDiscountVoucher
+    );
   }
   getRouter(): Router {
     return this.router;

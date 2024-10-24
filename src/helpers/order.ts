@@ -3,6 +3,7 @@ import { prisma } from "../libs/prisma";
 import { ResponseError } from "./response-error";
 import { Cart, CartItem, Product } from "@prisma/client";
 import { ShippingService } from "../services/shipping-service";
+import dayjs from "dayjs";
 
 export const getUserAddress = async (userId: number) => {
   const findAdress = await prisma.address.findFirst({
@@ -63,7 +64,7 @@ export const calculateTotalPriceAndWeight = async (cartItems: any) => {
   let totalProductPrice = 0;
   let totalProductWeight = 0;
   // check stock
-  for (const item of cartItems) { 
+  for (const item of cartItems) {
     const findStock = await prisma.stock.findUnique({
       where: { productId: item.productId },
     });
@@ -137,6 +138,12 @@ export const applyDiscountVoucherStore = async (
     throw new ResponseError(400, "incompleted requisite for use voucher");
   } else if (findVoucher.minOrderPrice > totalProductsPrice) {
     throw new ResponseError(400, "incompleted requisite for use voucher");
+  } else if (dayjs(findVoucher.expireAt).isBefore(dayjs())) {
+    throw new ResponseError(400, "expired voucher");
+  } else if (findVoucher.isClaimable === false) {
+    throw new ResponseError(400, "voucher is not claimable");
+  } else if (findVoucher.ecommerceAdminId !== null) {
+    throw new ResponseError(400, "voucher is not store voucher");
   }
 
   // check is user have that voucher
@@ -159,10 +166,3 @@ export const applyDiscountVoucherStore = async (
 
   return { discount };
 };
-
-export const applyDiscountVoucher = async (
-  finalTotalPrice: number,
-  finalShippingConst: number,
-  items: [],
-  userId: number
-) => {};

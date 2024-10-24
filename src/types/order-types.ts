@@ -6,11 +6,12 @@ export type CalculateOrderPerStorePayload = {
   note?: string;
 };
 
-// export type CalculateOrderPerStoreResponse = {
-//   totalPrice: number;
-//   shippingCost: number;
-//   discount: number;
-// };
+export type ApplyDiscountVoucherPayload = {
+  finalProductsPrice: number;
+  finalShippingCost: number;
+  orderItems: [];
+  voucherId: number;
+};
 
 export type CreateOrderPayload = {
   note?: string;
