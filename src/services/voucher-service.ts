@@ -339,7 +339,7 @@ export class VoucherService {
     // assign voucher to user
     const assignVoucher = await prisma.userVoucher.create({
       data: {
-        userId,
+        userId: payload.toUserId,
         isUsed: false,
         voucherId: payload.voucherId,
         expireAt: existVoucher.expireAt,

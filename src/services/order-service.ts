@@ -77,7 +77,7 @@ export class OrderService {
       const { discount: voucherDiscount } = await applyDiscountVoucherStore(
         totalProductPrice,
         userId,
-        payload.storeId,
+        payload.voucherId,
         cartItems.length,
         payload.storeId
       );

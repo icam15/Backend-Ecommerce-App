@@ -2,7 +2,7 @@ export type CalculateOrderPerStorePayload = {
   storeId: number;
   service: string;
   courier: string;
-  voucherId?: string;
+  voucherId?: number;
   note?: string;
 };
 

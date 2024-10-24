@@ -151,3 +151,10 @@ export const applyDiscountVoucherStore = async (
 
   return { discount };
 };
+
+export const applyDiscountVoucher = async (
+  finalTotalPrice: number,
+  finalShippingConst: number,
+  items: [],
+  userId: number
+) => {};

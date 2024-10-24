@@ -6,7 +6,7 @@ export class OrderValidation {
     storeId: z.number(),
     service: z.nativeEnum(ShippingServiceType),
     courier: z.nativeEnum(CourierType),
-    voucherId: z.string().optional(),
+    voucherId: z.number().optional(),
     note: z.string().optional(),
   });
   static readonly createOrderValidation = z.object({
