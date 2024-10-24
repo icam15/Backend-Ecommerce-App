@@ -63,12 +63,12 @@ export class OrderService {
     } = await calculateTotalPriceAndWeight(cartItems);
 
     // calculate shipping cost with user address and store address
-    const { cost, estimation } = await calculateShippingCost(
+    const { cost, estimation, service, costs } = await calculateShippingCost(
       userAdddress.cityId,
       store.cityId,
       totalProductWeight,
       payload.courier.toLowerCase(),
-      payload.service
+      payload.service!
     );
 
     // add discount if there is voucher store
@@ -88,9 +88,11 @@ export class OrderService {
       items: cartItems,
       totalPrice: totalProductPrice,
       discountStore: discount || 0,
+      costs: costs,
       shipping: {
         cost: cost,
-        estimation: estimation + "day",
+        estimation: estimation,
+        service: service,
       },
     };
   }
@@ -105,7 +107,7 @@ export class OrderService {
         item
       );
       finalProductPrice! += calculateOrderStore.totalPrice;
-      finalShippingCost! += calculateOrderStore.shipping.cost;
+      // finalShippingCost! += calculateOrderStore.shipping.cost;
       totalDiscount! += calculateOrderStore.discountStore;
     }
     if (payload.ecommerceVoucherId !== undefined) {

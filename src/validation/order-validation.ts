@@ -4,7 +4,7 @@ import { string, z } from "zod";
 export class OrderValidation {
   static readonly calculateOrderItemsByStoreValidation = z.object({
     storeId: z.number(),
-    service: z.nativeEnum(ShippingServiceType),
+    service: z.string().optional(),
     courier: z.nativeEnum(CourierType),
     voucherId: z.number().optional(),
     note: z.string().optional(),

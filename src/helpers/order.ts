@@ -89,21 +89,29 @@ export const calculateShippingCost = async (
   service: string
 ) => {
   const costs = await ShippingService.getShippingCost({
-    origin,
-    destination,
+    origin: 501,
+    destination: 114,
     weight,
     courier,
   });
   console.log(origin, destination, weight, courier);
 
-  const getCostByService: any = costs.filter(
-    (cost: any) => cost.service === service.toUpperCase()
-  );
-  console.log(costs);
-  console.log(getCostByService);
-  const cost = getCostByService.cost;
-  const estimation = getCostByService.cost;
-  return { cost, estimation };
+  let serviceDescription;
+  let cost;
+  let estimation;
+
+  if (service !== undefined) {
+    const getCostByService: any = costs.find(
+      (cost: any) => cost.service === service
+    );
+    serviceDescription = getCostByService.cost[0].service;
+    cost = getCostByService.cost[0].value;
+    estimation = getCostByService.cost[0].etd;
+    return { cost, estimation, service: serviceDescription };
+  }
+  // console.log(costs);
+
+  return { costs };
 };
 
 export const applyDiscountVoucherStore = async (
