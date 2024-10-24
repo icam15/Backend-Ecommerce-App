@@ -41,6 +41,60 @@ export class OrderService {
     return getSelectedCartItem;
   }
 
+  static async applyDiscountVoucher(payload: ApplyDiscountVoucherPayload) {
+    let totalDiscount = 0;
+    const findVoucher = await prisma.voucher.findUnique({
+      where: {
+        id: payload.voucherId,
+      },
+    });
+    if (!findVoucher) {
+      throw new ResponseError(400, "voucher not found");
+    } else if (findVoucher.minOrderItem > payload.orderItems.length) {
+      throw new ResponseError(400, "minimal order item is not sufficient");
+    } else if (findVoucher.minOrderPrice > payload.finalProductsPrice) {
+      throw new ResponseError(400, "minimal order price is not sufficient");
+    } else if (dayjs(findVoucher.expireAt).isBefore(dayjs())) {
+      throw new ResponseError(400, "expired voucher");
+    } else if (findVoucher.isClaimable === false) {
+      throw new ResponseError(400, "voucher is not claimable");
+    } else if (findVoucher.storeId !== null) {
+      throw new ResponseError(400, "voucher is store voucher type");
+    }
+
+    switch (findVoucher.discountType) {
+      case "FIXED_DISCOUNT":
+        let fixedDiscountAmount;
+        if (findVoucher.voucherType === "PRODUCT_PRICE") {
+          fixedDiscountAmount = findVoucher.discount;
+          payload.finalProductsPrice! -= fixedDiscountAmount;
+          totalDiscount += fixedDiscountAmount;
+        } else if (findVoucher.voucherType === "SHIPPING_COST") {
+          fixedDiscountAmount = findVoucher.discount;
+          payload.finalShippingCost! -= fixedDiscountAmount;
+          totalDiscount += fixedDiscountAmount;
+        }
+      case "PERCENT_DISCOUNT":
+        let percentDiscountAmount;
+        if (findVoucher.voucherType === "PRODUCT_PRICE") {
+          percentDiscountAmount =
+            (payload.finalProductsPrice / 100) * findVoucher.discount;
+          payload.finalProductsPrice -= percentDiscountAmount;
+          totalDiscount += percentDiscountAmount;
+        } else if (findVoucher.voucherType === "SHIPPING_COST") {
+          percentDiscountAmount =
+            (payload.finalShippingCost / 100) * findVoucher.discount;
+          payload.finalShippingCost -= percentDiscountAmount;
+          totalDiscount += percentDiscountAmount;
+        }
+    }
+    return {
+      newProductsPrice: payload.finalProductsPrice,
+      newFinalShippingCost: payload.finalShippingCost,
+      totalDiscount,
+    };
+  }
+
   static async calculateOrderItemByStore(
     userId: number,
     payload: CalculateOrderPerStorePayload
@@ -100,7 +154,7 @@ export class OrderService {
   }
 
   static async createOrder(userId: number, payload: CreateOrderPayload) {
-    let finalProductPrice = 0;
+    let finalProductsPrice = 0;
     let finalShippingCost = 0;
     let totalDiscount = 0;
     for (const item of payload.orderStore) {
@@ -108,7 +162,7 @@ export class OrderService {
         userId,
         item
       );
-      finalProductPrice! += calculateOrderStore.totalPrice;
+      finalProductsPrice! += calculateOrderStore.totalPrice;
       // finalShippingCost! += calculateOrderStore.shipping.cost;
       totalDiscount! += calculateOrderStore.discountStore;
     }
@@ -125,91 +179,78 @@ export class OrderService {
         throw new ResponseError(400, "voucher not found");
       }
 
-      switch (isVoucherUser.voucher.discountType) {
-        case "FIXED_DISCOUNT":
-          let fixedDiscountAmount;
-          if (isVoucherUser.voucher.voucherType === "PRODUCT_PRICE") {
-            fixedDiscountAmount = isVoucherUser.voucher.discount;
-            finalProductPrice! -= fixedDiscountAmount;
-            totalDiscount += fixedDiscountAmount;
-          } else if (isVoucherUser.voucher.voucherType === "SHIPPING_COST") {
-            fixedDiscountAmount = isVoucherUser.voucher.discount;
-            finalShippingCost! -= fixedDiscountAmount;
-            totalDiscount += fixedDiscountAmount;
-          }
-        case "PERCENT_DISCOUNT":
-          let percentDiscountAmount;
-          if (isVoucherUser.voucher.voucherType === "PRODUCT_PRICE") {
-            percentDiscountAmount =
-              (finalProductPrice / 100) * isVoucherUser.voucher.discount;
-            finalProductPrice -= percentDiscountAmount;
-            totalDiscount += percentDiscountAmount;
-          } else if (isVoucherUser.voucher.voucherType === "SHIPPING_COST") {
-            percentDiscountAmount =
-              (finalShippingCost / 100) * isVoucherUser.voucher.discount;
-            finalShippingCost -= percentDiscountAmount;
-            totalDiscount += percentDiscountAmount;
-          }
-      }
+      const {
+        newFinalShippingCost,
+        newProductsPrice,
+        totalDiscount: discountVoucher,
+      } = await this.applyDiscountVoucher({
+        finalProductsPrice: finalProductsPrice,
+        finalShippingCost: finalShippingCost,
+        orderItems: payload.orderStore,
+        voucherId: payload.ecommerceVoucherId,
+      });
+      finalProductsPrice = newProductsPrice;
+      finalShippingCost = newFinalShippingCost;
+      totalDiscount = discountVoucher;
     }
     return {
-      finalProductPrice,
+      finalProductsPrice,
       finalShippingCost,
       totalDiscount,
     };
   }
 
-  static async applyDiscountVoucher(payload: ApplyDiscountVoucherPayload) {
-    let totalDiscount = 0;
-    const findVoucher = await prisma.voucher.findUnique({
-      where: {
-        id: payload.voucherId,
-      },
-    });
-    if (!findVoucher) {
-      throw new ResponseError(400, "voucher not found");
-    } else if (findVoucher.minOrderItem > payload.orderItems.length) {
-      throw new ResponseError(400, "minimal order item is not sufficient");
-    } else if (findVoucher.minOrderPrice > payload.finalProductsPrice) {
-      throw new ResponseError(400, "minimal order price is not sufficient");
-    } else if (dayjs(findVoucher.expireAt).isBefore(dayjs())) {
-      throw new ResponseError(400, "expired voucher");
-    } else if (findVoucher.isClaimable === false) {
-      throw new ResponseError(400, "voucher is not claimable");
-    } else if (findVoucher.storeId !== null) {
-      throw new ResponseError(400, "voucher is store voucher type");
-    }
+  // static async applyDiscountVoucher(payload: ApplyDiscountVoucherPayload) {
+  //   let totalDiscount = 0;
+  //   const findVoucher = await prisma.voucher.findUnique({
+  //     where: {
+  //       id: payload.voucherId,
+  //     },
+  //   });
+  //   if (!findVoucher) {
+  //     throw new ResponseError(400, "voucher not found");
+  //   } else if (findVoucher.minOrderItem > payload.orderItems.length) {
+  //     throw new ResponseError(400, "minimal order item is not sufficient");
+  //   } else if (findVoucher.minOrderPrice > payload.finalProductsPrice) {
+  //     throw new ResponseError(400, "minimal order price is not sufficient");
+  //   } else if (dayjs(findVoucher.expireAt).isBefore(dayjs())) {
+  //     throw new ResponseError(400, "expired voucher");
+  //   } else if (findVoucher.isClaimable === false) {
+  //     throw new ResponseError(400, "voucher is not claimable");
+  //   } else if (findVoucher.storeId !== null) {
+  //     throw new ResponseError(400, "voucher is store voucher type");
+  //   }
 
-    switch (findVoucher.discountType) {
-      case "FIXED_DISCOUNT":
-        let fixedDiscountAmount;
-        if (findVoucher.voucherType === "PRODUCT_PRICE") {
-          fixedDiscountAmount = findVoucher.discount;
-          payload.finalProductsPrice! -= fixedDiscountAmount;
-          totalDiscount += fixedDiscountAmount;
-        } else if (findVoucher.voucherType === "SHIPPING_COST") {
-          fixedDiscountAmount = findVoucher.discount;
-          payload.finalShippingCost! -= fixedDiscountAmount;
-          totalDiscount += fixedDiscountAmount;
-        }
-      case "PERCENT_DISCOUNT":
-        let percentDiscountAmount;
-        if (findVoucher.voucherType === "PRODUCT_PRICE") {
-          percentDiscountAmount =
-            (payload.finalProductsPrice / 100) * findVoucher.discount;
-          payload.finalProductsPrice -= percentDiscountAmount;
-          totalDiscount += percentDiscountAmount;
-        } else if (findVoucher.voucherType === "SHIPPING_COST") {
-          percentDiscountAmount =
-            (payload.finalShippingCost / 100) * findVoucher.discount;
-          payload.finalShippingCost -= percentDiscountAmount;
-          totalDiscount += percentDiscountAmount;
-        }
-    }
-    return {
-      finalProductsPrice: payload.finalProductsPrice,
-      finalShippingCost: payload.finalShippingCost,
-      totalDiscount,
-    };
-  }
+  //   switch (findVoucher.discountType) {
+  //     case "FIXED_DISCOUNT":
+  //       let fixedDiscountAmount;
+  //       if (findVoucher.voucherType === "PRODUCT_PRICE") {
+  //         fixedDiscountAmount = findVoucher.discount;
+  //         payload.finalProductsPrice! -= fixedDiscountAmount;
+  //         totalDiscount += fixedDiscountAmount;
+  //       } else if (findVoucher.voucherType === "SHIPPING_COST") {
+  //         fixedDiscountAmount = findVoucher.discount;
+  //         payload.finalShippingCost! -= fixedDiscountAmount;
+  //         totalDiscount += fixedDiscountAmount;
+  //       }
+  //     case "PERCENT_DISCOUNT":
+  //       let percentDiscountAmount;
+  //       if (findVoucher.voucherType === "PRODUCT_PRICE") {
+  //         percentDiscountAmount =
+  //           (payload.finalProductsPrice / 100) * findVoucher.discount;
+  //         payload.finalProductsPrice -= percentDiscountAmount;
+  //         totalDiscount += percentDiscountAmount;
+  //       } else if (findVoucher.voucherType === "SHIPPING_COST") {
+  //         percentDiscountAmount =
+  //           (payload.finalShippingCost / 100) * findVoucher.discount;
+  //         payload.finalShippingCost -= percentDiscountAmount;
+  //         totalDiscount += percentDiscountAmount;
+  //       }
+  //   }
+  //   return {
+  //     finalProductsPrice: payload.finalProductsPrice,
+  //     finalShippingCost: payload.finalShippingCost,
+  //     totalDiscount,
+  //   };
+  // }
 }

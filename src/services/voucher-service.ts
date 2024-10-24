@@ -328,12 +328,14 @@ export class VoucherService {
     }
 
     // check if voucher is store voucher
-    const storeAdmin = await this.findStoreAdmin(userId);
-    if (
-      existVoucher.storeAdminId &&
-      existVoucher.storeId !== storeAdmin.storeId
-    ) {
-      throw new ResponseError(400, "you does not have access of this voucher");
+    if (existVoucher.storeAdminId) {
+      const storeAdmin = await this.findStoreAdmin(userId);
+      if (existVoucher.storeId !== storeAdmin.storeId) {
+        throw new ResponseError(
+          400,
+          "you does not have access of this voucher"
+        );
+      }
     }
 
     // assign voucher to user

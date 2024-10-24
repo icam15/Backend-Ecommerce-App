@@ -1,3 +1,5 @@
+import { UserRole, CartItem, Product } from "@prisma/client";
+
 export type CalculateOrderPerStorePayload = {
   storeId: number;
   service?: string;
@@ -9,7 +11,7 @@ export type CalculateOrderPerStorePayload = {
 export type ApplyDiscountVoucherPayload = {
   finalProductsPrice: number;
   finalShippingCost: number;
-  orderItems: [];
+  orderItems: any;
   voucherId: number;
 };
 
@@ -17,4 +19,17 @@ export type CreateOrderPayload = {
   note?: string;
   ecommerceVoucherId?: number;
   orderStore: CalculateOrderPerStorePayload[];
+};
+
+export type OrderItemTypes = {
+  id: number;
+  productId: number;
+  cartId: number;
+  storeId: number;
+  quantity: number;
+  weight: number;
+  isSelected: boolean;
+  createAt: string;
+  updateAt: string;
+  product: Product;
 };
