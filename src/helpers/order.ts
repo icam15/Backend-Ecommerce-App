@@ -63,8 +63,7 @@ export const calculateTotalPriceAndWeight = async (cartItems: any) => {
   let totalProductPrice = 0;
   let totalProductWeight = 0;
   // check stock
-  for (const item of cartItems) {
- 
+  for (const item of cartItems) { 
     const findStock = await prisma.stock.findUnique({
       where: { productId: item.productId },
     });
@@ -90,19 +89,29 @@ export const calculateShippingCost = async (
   service: string
 ) => {
   const costs = await ShippingService.getShippingCost({
-    origin,
-    destination,
+    origin: 501,
+    destination: 114,
     weight,
     courier,
   });
   console.log(origin, destination, weight, courier);
 
-  const getCostByService: any = costs.filter(
-    (cost: any) => cost.service === service.toUpperCase()
-  );
-  const cost = getCostByService.cost.value;
-  const estimation = getCostByService.cost.etd;
-  return { cost, estimation };
+  let serviceDescription;
+  let cost;
+  let estimation;
+
+  if (service !== undefined) {
+    const getCostByService: any = costs.find(
+      (cost: any) => cost.service === service
+    );
+    serviceDescription = getCostByService.cost[0].service;
+    cost = getCostByService.cost[0].value;
+    estimation = getCostByService.cost[0].etd;
+    return { cost, estimation, service: serviceDescription };
+  }
+  // console.log(costs);
+
+  return { costs };
 };
 
 export const applyDiscountVoucherStore = async (
@@ -150,3 +159,10 @@ export const applyDiscountVoucherStore = async (
 
   return { discount };
 };
+
+export const applyDiscountVoucher = async (
+  finalTotalPrice: number,
+  finalShippingConst: number,
+  items: [],
+  userId: number
+) => {};

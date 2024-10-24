@@ -16,6 +16,7 @@ export class OrderRouter {
       "/calculate-order-by-store",
       this.orderController.calculateOrderItemsByStore
     );
+    this.router.post("/add", this.orderController.createOrder);
   }
   getRouter(): Router {
     return this.router;
