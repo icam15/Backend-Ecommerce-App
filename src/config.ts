@@ -17,6 +17,7 @@ const envSchema = z.object({
   RAJA_ONGKIR_BASE_URL: z.string(),
   MIDTRANS_CLIENT_KEY: z.string(),
   MIDTRANS_SERVER_KEY: z.string(),
+  MIDTRANS_URL: z.string(),
 });
 
 declare global {
