@@ -9,12 +9,13 @@ export class OrderValidation {
     voucherId: z.number().optional(),
     note: z.string().optional(),
   });
+  
   static readonly createOrderValidation = z.object({
     note: z.string().optional(),
     ecommerceVoucherId: z.number().optional(),
     orderStore: z.array(this.calculateOrderItemsByStoreValidation).min(1),
   });
-
+  
   static readonly applyDiscountVoucherValidation = z.object({
     finalProductsPrice: z.number(),
     finalShippingCost: z.number(),
