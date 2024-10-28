@@ -1,4 +1,4 @@
-import { CourierType, ShippingServiceType } from "@prisma/client";
+import { CourierType } from "@prisma/client";
 import { string, z } from "zod";
 
 export class OrderValidation {

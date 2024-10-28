@@ -378,15 +378,14 @@ enum OrderStatus {
 model Order {
   id Int @id @default(autoincrement())
   userId Int @map("user_id")
-  estimation String
   note String?
   orderStatus OrderStatus @map("order_status")
   totalPrice Int @map("total_price")
   shippingCost Int @map("shipping_cost")
-  discountProducts Int @map("discount_products")
-  discountShippingConst Int @map("discount_shipping_cost")
+  discountProducts Int? @map("discount_products")
+  discountShippingCost Int? @map("discount_shipping_cost")
   totalPayment Int @map("total_payment")
-  paymentLink String @map("payment_link")
+  paymentLink String? @map("payment_link")
 
   deleteAt DateTime? @map("delete_at")
   createAt DateTime @default(now()) @map("create_at")
@@ -403,18 +402,17 @@ model OrderStore {
  id Int @id @default(autoincrement())
  storeId Int @map("store_id")
  orderId Int @map("order_id")
- service ShippingServiceType
+ service String
  courier CourierType
  discount Int @map("discount_products")
- storeVoucherId Int @map("store_voucher_id")
- shippingCost Int @map("shipping_cost")
+ storeVoucherId Int? @map("store_voucher_id")
  totalPrice Int  @map("total_price")
 
  createAt DateTime @default(now()) @map("create_at")
  updateAt DateTime @updatedAt @map("update_at")
 
  // Relation
- voucher Voucher @relation(fields: [storeVoucherId], references: [id])
+ voucher Voucher? @relation(fields: [storeVoucherId], references: [id])
  store Store @relation(fields: [storeId], references: [id])
  order Order @relation(fields: [orderId], references: [id])
  orderItem OrderItem[]

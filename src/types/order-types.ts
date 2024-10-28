@@ -1,9 +1,9 @@
-import { UserRole, CartItem, Product } from "@prisma/client";
+import { UserRole, CartItem, Product, CourierType } from "@prisma/client";
 
 export type CalculateOrderPerStorePayload = {
   storeId: number;
   service?: string;
-  courier: string;
+  courier: CourierType;
   voucherId?: number;
   note?: string;
 };

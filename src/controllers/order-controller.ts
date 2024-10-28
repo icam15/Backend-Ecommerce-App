@@ -72,11 +72,15 @@ export class OrderController {
         OrderValidation.createOrderValidation,
         req.body as CreateOrderPayload
       );
-      const result = await OrderService.createOrder(session.id, payload);
+      const { paymentLink } = await OrderService.createOrder(
+        session.id,
+        payload,
+        next
+      );
       res.status(201).json({
         status: "success",
         message: "create new order order is success",
-        result,
+        paymentLink,
       });
     } catch (e) {
       next(e);
