@@ -232,6 +232,7 @@ model Product {
   productImage ProductImage[]
   stock Stock?
   cartItem CartItem[]
+  orderItem OrderItem[]
   
 
   
@@ -428,6 +429,7 @@ model OrderItem {
 
   // Relation 
   orderStore OrderStore @relation(fields: [orderStoreId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
 
 
   @@map("order_item")

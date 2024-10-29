@@ -155,11 +155,7 @@ export class OrderService {
     };
   }
 
-  static async createOrder(
-    userId: number,
-    payload: CreateOrderPayload,
-    next: NextFunction
-  ) {
+  static async createOrder(userId: number, payload: CreateOrderPayload) {
     let finalProductsPrice = 0;
     let finalShippingCost = 0;
     let totalDiscountProducts = 0;
@@ -201,18 +197,6 @@ export class OrderService {
             item
           );
 
-          // decrement stock products
-          for (const cartItem of calculateOrderStore.items) {
-            await tx.product.update({
-              where: {
-                id: cartItem.productId,
-              },
-              data: {
-                stock: { update: { amount: { decrement: cartItem.quantity } } },
-              },
-            });
-          }
-
           finalProductsPrice! += calculateOrderStore.totalPrice;
           finalShippingCost! += calculateOrderStore.shipping.cost;
           totalDiscountProducts! += calculateOrderStore.discountStore;
@@ -230,6 +214,26 @@ export class OrderService {
           });
           if (!addOrderstore) {
             throw new ResponseError(400, "cant add order store");
+          }
+
+          // decrement stock products
+          for (const cartItem of calculateOrderStore.items) {
+            await tx.product.update({
+              where: {
+                id: cartItem.productId,
+              },
+              data: {
+                stock: { update: { amount: { decrement: cartItem.quantity } } },
+              },
+            });
+
+            await tx.orderItem.create({
+              data: {
+                productId: cartItem.productId,
+                quantity: cartItem.quantity,
+                orderStoreId: addOrderstore.id,
+              },
+            });
           }
         }
 
@@ -270,8 +274,8 @@ export class OrderService {
             paymentLink: link,
           },
         });
-        // delete cart item
 
+        // delete cart item
         const findCart = await tx.cart.findFirst({
           where: {
             userId,
@@ -283,7 +287,6 @@ export class OrderService {
             isSelected: true,
           },
         });
-
         paymentLink = link;
       });
     } catch (e: any) {
@@ -292,5 +295,22 @@ export class OrderService {
       // next(e);
     }
     return { paymentLink };
+  }
+
+  static async getOrder(userId: number, orderId: number) {
+    const findOrder = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+      include: {
+        orderStore: { include: { orderItem: { include: { product: true } } } },
+      },
+    });
+    if (!findOrder) {
+      throw new ResponseError(400, "order not found");
+    } else if (findOrder.userId !== userId) {
+      throw new ResponseError(400, "you are not allowed of this resources");
+    }
+    return findOrder;
   }
 }
