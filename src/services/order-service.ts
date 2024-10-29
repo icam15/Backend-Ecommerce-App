@@ -179,7 +179,7 @@ export class OrderService {
         throw new ResponseError(400, "voucher not found");
       }
     }
-    // console.log("this step");
+
     try {
       await prisma.$transaction(async (tx) => {
         const newOrder = await tx.order.create({
@@ -200,6 +200,19 @@ export class OrderService {
             userId,
             item
           );
+
+          // decrement stock products
+          for (const cartItem of calculateOrderStore.items) {
+            await tx.product.update({
+              where: {
+                id: cartItem.productId,
+              },
+              data: {
+                stock: { update: { amount: { decrement: cartItem.quantity } } },
+              },
+            });
+          }
+
           finalProductsPrice! += calculateOrderStore.totalPrice;
           finalShippingCost! += calculateOrderStore.shipping.cost;
           totalDiscountProducts! += calculateOrderStore.discountStore;
@@ -257,6 +270,20 @@ export class OrderService {
             paymentLink: link,
           },
         });
+        // delete cart item
+
+        const findCart = await tx.cart.findFirst({
+          where: {
+            userId,
+          },
+        });
+        await tx.cartItem.deleteMany({
+          where: {
+            cartId: findCart!.id,
+            isSelected: true,
+          },
+        });
+
         paymentLink = link;
       });
     } catch (e: any) {
