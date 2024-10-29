@@ -74,8 +74,7 @@ export class OrderController {
       );
       const { paymentLink } = await OrderService.createOrder(
         session.id,
-        payload,
-        next
+        payload
       );
       res.status(201).json({
         status: "success",
@@ -85,5 +84,25 @@ export class OrderController {
     } catch (e) {
       next(e);
     }
+  }
+
+  async getOrder(
+    req: Request<{ orderId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { orderId } = req.params;
+      const result = await OrderService.getOrder(session.id, Number(orderId));
+      res.status(201).json({
+        status: "success",
+        message: "get order is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+    1;
   }
 }

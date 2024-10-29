@@ -21,6 +21,7 @@ export class OrderRouter {
       "/apply-voucher",
       this.orderController.applyDiscountVoucher
     );
+    this.router.get("/:orderId", this.orderController.getOrder);
   }
   getRouter(): Router {
     return this.router;
