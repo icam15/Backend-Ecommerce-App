@@ -356,8 +356,13 @@ export class OrderService {
       },
       include: { orderStore: { include: { orderItem: true } } },
     });
-    if (!order || order.userId !== userId) {
+    if (!order) {
       throw new ResponseError(404, "order not found");
+    } else if (order.userId !== userId) {
+      throw new ResponseError(
+        403,
+        "you does not have access of this resources"
+      );
     } else if (order.orderStatus !== "WAITING_FOR_PAYMENT") {
       throw new ResponseError(400, "order cannot be cancel");
     }
@@ -398,5 +403,33 @@ export class OrderService {
       }),
     ];
     await prisma.$transaction(transaction);
+  }
+
+  static async confirmOrder(userId: number, orderId: number) {
+    const order = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+    });
+    if (!order) {
+      throw new ResponseError(404, "order not found");
+    } else if (order.userId !== userId) {
+      throw new ResponseError(
+        403,
+        "you does not have acceess of this resources"
+      );
+    } else if (order.orderStatus !== "DELIVERED") {
+      throw new ResponseError(400, "order was not delivered");
+    }
+
+    const updateOrder = await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        orderStatus: "CONFIRMED",
+      },
+    });
+    return updateOrder;
   }
 }

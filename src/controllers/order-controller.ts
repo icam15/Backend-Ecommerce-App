@@ -142,4 +142,26 @@ export class OrderController {
       next(e);
     }
   }
+
+  async confirmOrder(
+    req: Request<{ orderId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { orderId } = req.params;
+      const result = await OrderService.confirmOrder(
+        session.id,
+        Number(orderId)
+      );
+      res.status(201).json({
+        status: "success",
+        message: "order is success confirmed",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
