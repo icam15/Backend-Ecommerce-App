@@ -105,4 +105,23 @@ export class OrderController {
     }
     1;
   }
+
+  async getOrderByStatus(
+    req: Request<{ status: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const { status } = req.params;
+      const result = await OrderService.getOrderByStatus(session.id, status);
+      res.status(201).json({
+        status: "success",
+        message: "get orders by status is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

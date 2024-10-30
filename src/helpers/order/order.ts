@@ -1,7 +1,7 @@
 import { Response, response } from "express";
 import { prisma } from "../../libs/prisma";
 import { ResponseError } from "../response-error";
-import { Cart, CartItem, Product } from "@prisma/client";
+import { Cart, CartItem, OrderStatus, Product } from "@prisma/client";
 import { ShippingService } from "../../services/shipping-service";
 import dayjs from "dayjs";
 import { OrderItemTypes } from "../../types/order-types";
@@ -166,4 +166,18 @@ export const applyDiscountVoucherStore = async (
   }
 
   return { discount };
+};
+
+export const mapStatusOrderToEnum = (status: string): OrderStatus | null => {
+  const statusMap: { [key: string]: OrderStatus } = {
+    awaiting_for_payment: OrderStatus.WAITING_FOR_PAYMENT,
+    awaiting_for_confirmation: OrderStatus.WAITING_FOR_CONFIRMATION,
+    cancelled: OrderStatus.CANCELLED,
+    process: OrderStatus.PROCESS,
+    shipping: OrderStatus.SHIPPING,
+    delivered: OrderStatus.DELIVERED,
+    confirmed: OrderStatus.CONFIRMED,
+  };
+  console.log(statusMap[status.toLowerCase()]);
+  return statusMap[status.toLowerCase()] || null;
 };

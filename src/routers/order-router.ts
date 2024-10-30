@@ -22,6 +22,7 @@ export class OrderRouter {
       this.orderController.applyDiscountVoucher
     );
     this.router.get("/:orderId", this.orderController.getOrder);
+    this.router.get("/status/:status", this.orderController.getOrderByStatus);
   }
   getRouter(): Router {
     return this.router;

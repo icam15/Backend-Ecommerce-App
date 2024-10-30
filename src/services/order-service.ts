@@ -1,3 +1,4 @@
+import { OrderStatus } from "./../../node_modules/.prisma/client/index.d";
 import {
   applyDiscountVoucherStore,
   calculateShippingCost,
@@ -5,6 +6,7 @@ import {
   getCartItemsSelectedByStore,
   getExistStore,
   getUserAddress,
+  mapStatusOrderToEnum,
 } from "../helpers/order/order";
 import { ResponseError } from "../helpers/response-error";
 import { prisma } from "../libs/prisma";
@@ -298,19 +300,52 @@ export class OrderService {
   }
 
   static async getOrder(userId: number, orderId: number) {
-    const findOrder = await prisma.order.findUnique({
+    const order = await prisma.order.findUnique({
       where: {
         id: orderId,
       },
       include: {
-        orderStore: { include: { orderItem: { include: { product: true } } } },
+        orderStore: {
+          include: {
+            orderItem: {
+              include: { product: { include: { productImage: true } } },
+            },
+          },
+        },
       },
     });
-    if (!findOrder) {
+    if (!order) {
       throw new ResponseError(400, "order not found");
-    } else if (findOrder.userId !== userId) {
+    } else if (order.userId !== userId) {
       throw new ResponseError(400, "you are not allowed of this resources");
     }
-    return findOrder;
+    return order;
+  }
+
+  static async getOrderByStatus(userId: number, status: string) {
+    const orderStatus = mapStatusOrderToEnum(status);
+    if (!orderStatus) {
+      throw new ResponseError(401, `Invalid order status ${status}`);
+    }
+    console.log(orderStatus);
+    const orders = await prisma.order.findMany({
+      where: {
+        orderStatus,
+        userId,
+      },
+      include: {
+        orderStore: {
+          include: {
+            orderItem: {
+              include: { product: { include: { productImage: true } } },
+            },
+          },
+        },
+      },
+    });
+    if (orders.length === 0) {
+      throw new ResponseError(404, "there is no order by the status");
+    }
+    return orders;
   }
 }
