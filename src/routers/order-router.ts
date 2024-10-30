@@ -23,6 +23,8 @@ export class OrderRouter {
     );
     this.router.get("/:orderId", this.orderController.getOrder);
     this.router.get("/status/:status", this.orderController.getOrderByStatus);
+    this.router.post("/:orderId/cancel", this.orderController.cancelOrder);
+    this.router.post("/:orderId/confirm", this.orderController.confirmOrder);
   }
   getRouter(): Router {
     return this.router;
