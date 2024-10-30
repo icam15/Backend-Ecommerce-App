@@ -181,3 +181,57 @@ export const mapStatusOrderToEnum = (status: string): OrderStatus | null => {
   console.log(statusMap[status.toLowerCase()]);
   return statusMap[status.toLowerCase()] || null;
 };
+
+// export const cancelOrderTransaction = async (
+//   userId: number,
+//   orderId: number
+// ) => {
+//   const order = await prisma.order.findUnique({
+//     where: {
+//       id: orderId,
+//     },
+//     include: { orderStore: { include: { orderItem: true } } },
+//   });
+//   if (!order || order.userId !== userId) {
+//     throw new ResponseError(404, "order not found");
+//   } else if (order.orderStatus !== "WAITING_FOR_PAYMENT") {
+//     throw new ResponseError(400, "order cannot be cancel");
+//   }
+//   let orderItems = [];
+//   for (const orderStore of order.orderStore) {
+//     const orderItemsDb = await prisma.orderItem.findMany({
+//       where: {
+//         orderStoreId: orderStore.id,
+//       },
+//     });
+//     if (orderItems.length === 0) {
+//       throw new ResponseError(
+//         404,
+//         `there is not order item with order Store id:${orderStore.id}`
+//       );
+//     }
+//     orderItems.push(...orderItemsDb);
+//   }
+
+//   const transaction = [
+//     // update status order
+//     prisma.order.update({
+//       where: { id: orderId },
+//       data: { orderStatus: "CANCELLED" },
+//     }),
+//     // return back stock item
+//     ...orderItems.flatMap((orderItem) => {
+//       return [
+//         prisma.stock.update({
+//           where: {
+//             productId: orderItem.id,
+//           },
+//           data: {
+//             amount: { increment: orderItem.quantity },
+//           },
+//         }),
+//       ];
+//     }),
+//   ];
+//   await prisma.$transaction(transaction);
+// };
