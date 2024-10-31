@@ -18,6 +18,8 @@ import {
 import { NextFunction, Response, text } from "express";
 import dayjs from "dayjs";
 import { createPaymentLink } from "../helpers/order/payment";
+import { decode } from "base64-arraybuffer";
+import { getUrlImageFromBucket, uploadImageToBucket } from "../utils/supabase";
 
 export class OrderService {
   static async getCheckoutCart(userId: number) {
@@ -428,6 +430,51 @@ export class OrderService {
       },
       data: {
         orderStatus: "CONFIRMED",
+      },
+    });
+    return updateOrder;
+  }
+
+  static async uploadPaymentProof(
+    userId: number,
+    orderId: number,
+    file: Express.Multer.File
+  ) {
+    const order = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+    });
+    if (!order) {
+      throw new ResponseError(404, "order not found");
+    } else if (order.userId !== userId) {
+      throw new ResponseError(
+        403,
+        "you does not have access of this resources"
+      );
+    } else if (order.paymentProof) {
+      throw new ResponseError(400, "payment proof was uploaded");
+    }
+
+    const base64File = file.buffer.toString("base64");
+    const arrayBufferFile = decode(base64File);
+
+    // upload image to bucket
+    const originalFileName = file.originalname.split(".");
+    const fileExt = originalFileName[originalFileName.length - 1].toLowerCase();
+    const filePath = `${order.id}-${Date.now()}.${fileExt}`;
+    const { err } = await uploadImageToBucket(filePath, arrayBufferFile);
+    if (err) {
+      throw new ResponseError(400, `${err.name}:${err.message}`);
+    }
+    // get url file from bucket
+    const { imageUrl: fileUrl } = await getUrlImageFromBucket(filePath);
+    const updateOrder = await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        paymentProof: fileUrl,
       },
     });
     return updateOrder;

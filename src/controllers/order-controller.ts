@@ -7,6 +7,7 @@ import {
   CalculateOrderPerStorePayload,
   CreateOrderPayload,
 } from "../types/order-types";
+import { ResponseError } from "../helpers/response-error";
 
 export class OrderController {
   async getCheckoutCart(req: Request, res: Response, next: NextFunction) {
@@ -158,6 +159,30 @@ export class OrderController {
       res.status(201).json({
         status: "success",
         message: "order is success confirmed",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async uploadPaymentProof(
+    req: Request<{ orderId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      if (!req.file) throw new ResponseError(400, "no file uploaded");
+      const { orderId } = req.params;
+      const result = await OrderService.uploadPaymentProof(
+        session.id,
+        Number(orderId),
+        req.file!
+      );
+      res.status(201).json({
+        status: "success",
+        message: "upload payment proof is success",
         result,
       });
     } catch (e) {

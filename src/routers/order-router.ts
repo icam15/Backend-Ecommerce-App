@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { OrderController } from "../controllers/order-controller";
+import { uploadFile } from "../utils/multer";
 
 export class OrderRouter {
   private router: Router;
@@ -25,6 +26,11 @@ export class OrderRouter {
     this.router.get("/status/:status", this.orderController.getOrderByStatus);
     this.router.post("/:orderId/cancel", this.orderController.cancelOrder);
     this.router.post("/:orderId/confirm", this.orderController.confirmOrder);
+    this.router.patch(
+      "/:orderId/payment-proof",
+      uploadFile.single("file"),
+      this.orderController.uploadPaymentProof
+    );
   }
   getRouter(): Router {
     return this.router;

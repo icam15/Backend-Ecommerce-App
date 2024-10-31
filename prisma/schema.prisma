@@ -387,6 +387,7 @@ model Order {
   discountShippingCost Int? @map("discount_shipping_cost")
   totalPayment Int @map("total_payment")
   paymentLink String? @map("payment_link")
+  paymentProof String? @map("payment_proof")
 
   deleteAt DateTime? @map("delete_at")
   createAt DateTime @default(now()) @map("create_at")
