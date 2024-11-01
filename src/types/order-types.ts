@@ -1,6 +1,6 @@
 import { UserRole, CartItem, Product, CourierType } from "@prisma/client";
 
-export type CalculateOrderPerStorePayload = {
+export type CalculateOrderPayload = {
   storeId: number;
   service?: string;
   courier: CourierType;
@@ -15,10 +15,10 @@ export type ApplyDiscountVoucherPayload = {
   voucherId: number;
 };
 
-export type CreateOrderPayload = {
+export type CreateWrapperOrderPayload = {
   note?: string;
   ecommerceVoucherId?: number;
-  orderStore: CalculateOrderPerStorePayload[];
+  orderStore: CalculateOrderPayload[];
 };
 
 export type OrderItemTypes = {
@@ -32,4 +32,9 @@ export type OrderItemTypes = {
   createAt: string;
   updateAt: string;
   product: Product;
+};
+
+export type ChangeOrderStatusPayload = {
+  orderStoreId: number;
+  newStatus: string;
 };

@@ -9,6 +9,7 @@ export class OrderValidation {
     voucherId: z.number().optional(),
     note: z.string().optional(),
   });
+
   static readonly createOrderValidation = z.object({
     note: z.string().optional(),
     ecommerceVoucherId: z.number().optional(),
@@ -20,5 +21,9 @@ export class OrderValidation {
     finalShippingCost: z.number(),
     orderItems: z.array(z.number()),
     voucherId: z.number(),
+  });
+
+  static readonly changeOrderStatusValidation = z.object({
+    orderStoreId: z.number(),
   });
 }

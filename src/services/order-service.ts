@@ -13,6 +13,7 @@ import { prisma } from "../libs/prisma";
 import {
   ApplyDiscountVoucherPayload,
   CalculateOrderPerStorePayload,
+  ChangeOrderStatusPayload,
   CreateOrderPayload,
 } from "../types/order-types";
 import { NextFunction, Response, text } from "express";
@@ -101,7 +102,7 @@ export class OrderService {
     };
   }
 
-  static async calculateOrderItemByStore(
+  static async calculateOrderItemsByStore(
     userId: number,
     payload: CalculateOrderPerStorePayload
   ) {
@@ -182,7 +183,7 @@ export class OrderService {
 
     try {
       await prisma.$transaction(async (tx) => {
-        const newOrder = await tx.order.create({
+        const addWrapperOrder = await tx.wrapperOrder.create({
           data: {
             orderStatus: "WAITING_FOR_PAYMENT",
             shippingCost: 0,
@@ -192,11 +193,11 @@ export class OrderService {
             note: payload.note,
           },
         });
-        if (!newOrder) {
+        if (!addWrapperOrder) {
           throw new ResponseError(400, "cant create order");
         }
         for (const item of payload.orderStore) {
-          const calculateOrderStore = await this.calculateOrderItemByStore(
+          const calculateOrderStore = await this.calculateOrderItemsByStore(
             userId,
             item
           );
@@ -205,15 +206,16 @@ export class OrderService {
           finalShippingCost! += calculateOrderStore.shipping.cost;
           totalDiscountProducts! += calculateOrderStore.discountStore;
 
-          const addOrderstore = await tx.orderStore.create({
+          const addOrderstore = await tx.order.create({
             data: {
               courier: item.courier,
               discount: calculateOrderStore.discountStore,
               service: item.service!,
               totalPrice: calculateOrderStore.totalPrice,
-              orderId: newOrder.id,
+              wrapperOrderId: addWrapperOrder.id,
               storeId: item.storeId,
               storeVoucherId: item.voucherId!,
+              userId,
             },
           });
           if (!addOrderstore) {
@@ -261,13 +263,13 @@ export class OrderService {
         }
         // get payment link
         const link = await createPaymentLink(
-          newOrder.id,
+          addWrapperOrder.id,
           finalProductsPrice + finalShippingCost
         );
         // update the store
-        await tx.order.update({
+        await tx.wrapperOrder.update({
           where: {
-            id: newOrder.id,
+            id: addWrapperOrder.id,
           },
           data: {
             discountProducts: totalDiscountProducts,
@@ -307,12 +309,8 @@ export class OrderService {
         id: orderId,
       },
       include: {
-        orderStore: {
-          include: {
-            orderItem: {
-              include: { product: { include: { productImage: true } } },
-            },
-          },
+        orderItem: {
+          include: { product: { include: { productImage: true } } },
         },
       },
     });
@@ -329,111 +327,48 @@ export class OrderService {
     if (!orderStatus) {
       throw new ResponseError(401, `Invalid order status ${status}`);
     }
-    console.log(orderStatus);
-    const orders = await prisma.order.findMany({
+
+    const orders = await prisma.orderStore.findMany({
       where: {
-        orderStatus,
         userId,
-      },
-      include: {
-        orderStore: {
-          include: {
-            orderItem: {
-              include: { product: { include: { productImage: true } } },
-            },
-          },
-        },
+        orderStatus: orderStatus,
       },
     });
     if (orders.length === 0) {
-      throw new ResponseError(404, "there is no order by the status");
+      throw new ResponseError(400, "order not found");
     }
     return orders;
   }
 
-  static async cancelOrder(userId: number, orderId: number) {
-    const order = await prisma.order.findUnique({
-      where: {
-        id: orderId,
-      },
-      include: { orderStore: { include: { orderItem: true } } },
-    });
-    if (!order) {
-      throw new ResponseError(404, "order not found");
-    } else if (order.userId !== userId) {
-      throw new ResponseError(
-        403,
-        "you does not have access of this resources"
-      );
-    } else if (order.orderStatus !== "WAITING_FOR_PAYMENT") {
-      throw new ResponseError(400, "order cannot be cancel");
-    }
-    let orderItems = [];
-    for (const orderStore of order.orderStore) {
-      const orderItemsDb = await prisma.orderItem.findMany({
-        where: {
-          orderStoreId: orderStore.id,
-        },
-      });
-      if (orderItemsDb.length === 0) {
-        throw new ResponseError(
-          404,
-          `there is not order item with order Store id:${orderStore.id}`
-        );
-      }
-      orderItems.push(...orderItemsDb);
-    }
+  static async cancelOrder(userId: number, orderId: number) {}
 
-    const transaction = [
-      // update status order
-      prisma.order.update({
-        where: { id: orderId },
-        data: { orderStatus: "CANCELLED" },
-      }),
-      // return back stock item
-      ...orderItems.flatMap((orderItem) => {
-        return [
-          prisma.stock.update({
-            where: {
-              productId: orderItem.productId,
-            },
-            data: {
-              amount: { increment: orderItem.quantity },
-            },
-          }),
-        ];
-      }),
-    ];
-    await prisma.$transaction(transaction);
-  }
+  // static async confirmOrder(userId: number, orderId: number) {
+  //   const order = await prisma.order.findUnique({
+  //     where: {
+  //       id: orderId,
+  //     },
+  //   });
+  //   if (!order) {
+  //     throw new ResponseError(404, "order not found");
+  //   } else if (order.userId !== userId) {
+  //     throw new ResponseError(
+  //       403,
+  //       "you does not have acceess of this resources"
+  //     );
+  //   } else if (order.orderStatus !== "DELIVERED") {
+  //     throw new ResponseError(400, "order was not delivered");
+  //   }
 
-  static async confirmOrder(userId: number, orderId: number) {
-    const order = await prisma.order.findUnique({
-      where: {
-        id: orderId,
-      },
-    });
-    if (!order) {
-      throw new ResponseError(404, "order not found");
-    } else if (order.userId !== userId) {
-      throw new ResponseError(
-        403,
-        "you does not have acceess of this resources"
-      );
-    } else if (order.orderStatus !== "DELIVERED") {
-      throw new ResponseError(400, "order was not delivered");
-    }
-
-    const updateOrder = await prisma.order.update({
-      where: {
-        id: orderId,
-      },
-      data: {
-        orderStatus: "CONFIRMED",
-      },
-    });
-    return updateOrder;
-  }
+  //   const updateOrder = await prisma.order.update({
+  //     where: {
+  //       id: orderId,
+  //     },
+  //     data: {
+  //       orderStatus: "CONFIRMED",
+  //     },
+  //   });
+  //   return updateOrder;
+  // }
 
   static async uploadPaymentProof(
     userId: number,
@@ -479,4 +414,18 @@ export class OrderService {
     });
     return updateOrder;
   }
+
+  // static async changeOrderStoreStatusByAdminStore(
+  //   userId: number,
+  //   payload: ChangeOrderStatusPayload
+  // ) {
+  //   const orderStore = await prisma.orderStore.findUnique({
+  //     where: {
+  //       id: payload.orderStoreId,
+  //     },
+  //   });
+  //   if (!order) {
+  //     throw new ResponseError(404, "order not found");
+  //   }
+  // }
 }

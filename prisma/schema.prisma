@@ -82,6 +82,7 @@ model User{
   store Store?
   voucher Voucher[]
   userVoucher UserVoucher[]
+  wrapperOrder WrapperOrder[]
   order Order[]
 }
 
@@ -191,7 +192,7 @@ model Store{
   storeEtalase StoreEtalase[]
   cartItem CartItem[]
   voucher Voucher[]
-  orderStore OrderStore[]
+  order Order[]
 
   @@map("store")
 }
@@ -343,7 +344,7 @@ model Voucher {
   storeAdmin StoreAdmin? @relation(fields: [storeAdminId], references: [id])
   ecommerceAdmin User? @relation(fields: [ecommerceAdminId], references: [id])
   userVoucher UserVoucher[]
-  orderStore OrderStore[]
+  order Order[]
 
 
   @@map("voucher")
@@ -376,11 +377,16 @@ enum OrderStatus {
   CANCELLED
 }
 
-model Order {
+enum OrderPaymentStatus {
+  WAITING_FOR_PAYMENT
+  ALREADY_PAID
+}
+
+model WrapperOrder {
   id Int @id @default(autoincrement())
   userId Int @map("user_id")
   note String?
-  orderStatus OrderStatus @map("order_status")
+  orderStatus OrderPaymentStatus @map("order_payment_status")
   totalPrice Int @map("total_price")
   shippingCost Int @map("shipping_cost")
   discountProducts Int? @map("discount_products")
@@ -395,20 +401,22 @@ model Order {
 
   // Relation
   user User @relation(fields: [userId], references: [id])
-  orderStore OrderStore[]
+  order Order[]
 
-  @@map("order")
+  @@map("wrapper_order")
 }
 
-model OrderStore {
+model Order {
  id Int @id @default(autoincrement())
  storeId Int @map("store_id")
- orderId Int @map("order_id")
+ wrapperOrderId Int @map("wrapper_order_id")
+ userId Int @map("user_id")
  service String
  courier CourierType
  discount Int @map("discount_products")
  storeVoucherId Int? @map("store_voucher_id")
  totalPrice Int  @map("total_price")
+ orderStatus OrderStatus @default(value:WAITING_FOR_PAYMENT) @map("order_status") 
 
  createAt DateTime @default(now()) @map("create_at")
  updateAt DateTime @updatedAt @map("update_at")
@@ -416,7 +424,8 @@ model OrderStore {
  // Relation
  voucher Voucher? @relation(fields: [storeVoucherId], references: [id])
  store Store @relation(fields: [storeId], references: [id])
- order Order @relation(fields: [orderId], references: [id])
+ wrapperOrder WrapperOrder @relation(fields: [wrapperOrderId], references: [id])
+ user User @relation(fields: [userId], references: [id])
  orderItem OrderItem[]
 
  @@map("order_store")
@@ -428,8 +437,8 @@ model OrderItem {
   orderStoreId Int @map("order_store_id")
   quantity Int 
 
-  // Relation 
-  orderStore OrderStore @relation(fields: [orderStoreId], references: [id])
+  // Relation
+  order Order[] 
   product Product @relation(fields: [productId], references: [id])
 
 
