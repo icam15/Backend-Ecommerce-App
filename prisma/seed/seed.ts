@@ -25,8 +25,7 @@ async function main() {
     const rajaOngkirBaseUrl = process.env.RAJA_ONGKIR_BASE_URL!;
     const headers = new Headers();
     headers.append("key", rajaOngkirApiKey);
-
-    // get list of category
+    // // get list of category
     // const categories = listCategories(1);
     // for (const category of categories) {
     //   await prisma.category.create({
@@ -36,7 +35,6 @@ async function main() {
     //     },
     //   });
     // }
-
     // get list of province
     const getListProvince = await fetch(`${rajaOngkirBaseUrl}/province`, {
       method: "GET",

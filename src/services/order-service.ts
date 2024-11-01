@@ -12,9 +12,9 @@ import { ResponseError } from "../helpers/response-error";
 import { prisma } from "../libs/prisma";
 import {
   ApplyDiscountVoucherPayload,
-  CalculateOrderPerStorePayload,
+  CalculateOrderPayload,
   ChangeOrderStatusPayload,
-  CreateOrderPayload,
+  CreateWrapperOrderPayload,
 } from "../types/order-types";
 import { NextFunction, Response, text } from "express";
 import dayjs from "dayjs";
@@ -104,7 +104,7 @@ export class OrderService {
 
   static async calculateOrderItemsByStore(
     userId: number,
-    payload: CalculateOrderPerStorePayload
+    payload: CalculateOrderPayload
   ) {
     // get user main address
     const userAdddress = await getUserAddress(userId);
@@ -127,9 +127,9 @@ export class OrderService {
 
     // calculate shipping cost with user address and store address
     const { cost, estimation, service, costs } = await calculateShippingCost(
-      userAdddress.cityId,
-      store.cityId,
-      totalProductWeight,
+      501,
+      114,
+      10,
       payload.courier.toLowerCase(),
       payload.service!
     );
@@ -160,7 +160,7 @@ export class OrderService {
     };
   }
 
-  static async createOrder(userId: number, payload: CreateOrderPayload) {
+  static async createOrder(userId: number, payload: CreateWrapperOrderPayload) {
     let finalProductsPrice = 0;
     let finalShippingCost = 0;
     let totalDiscountProducts = 0;
@@ -328,7 +328,7 @@ export class OrderService {
       throw new ResponseError(401, `Invalid order status ${status}`);
     }
 
-    const orders = await prisma.orderStore.findMany({
+    const orders = await prisma.order.findMany({
       where: {
         userId,
         orderStatus: orderStatus,
@@ -340,44 +340,75 @@ export class OrderService {
     return orders;
   }
 
-  static async cancelOrder(userId: number, orderId: number) {}
-
-  // static async confirmOrder(userId: number, orderId: number) {
-  //   const order = await prisma.order.findUnique({
-  //     where: {
-  //       id: orderId,
-  //     },
-  //   });
-  //   if (!order) {
-  //     throw new ResponseError(404, "order not found");
-  //   } else if (order.userId !== userId) {
-  //     throw new ResponseError(
-  //       403,
-  //       "you does not have acceess of this resources"
-  //     );
-  //   } else if (order.orderStatus !== "DELIVERED") {
-  //     throw new ResponseError(400, "order was not delivered");
-  //   }
-
-  //   const updateOrder = await prisma.order.update({
-  //     where: {
-  //       id: orderId,
-  //     },
-  //     data: {
-  //       orderStatus: "CONFIRMED",
-  //     },
-  //   });
-  //   return updateOrder;
-  // }
-
-  static async uploadPaymentProof(
-    userId: number,
-    orderId: number,
-    file: Express.Multer.File
-  ) {
+  static async cancelOrder(userId: number, orderId: number) {
     const order = await prisma.order.findUnique({
       where: {
         id: orderId,
+      },
+      include: {
+        wrapperOrder: true,
+      },
+    });
+    if (!order) {
+      throw new ResponseError(404, "order not found");
+    } else if (order.userId !== userId) {
+      throw new ResponseError(
+        400,
+        "you does not have access of this resources"
+      );
+    }
+    if (order.orderStatus !== "WAITING_FOR_PAYMENT") {
+      throw new ResponseError(400, "order cannot be canceled");
+    } else if (order.wrapperOrder.paymentProof) {
+      throw new ResponseError(
+        400,
+        "order cannot be canceled because payment proof was uploaded"
+      );
+    }
+    await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: { orderStatus: "CANCELLED" },
+    });
+  }
+
+  static async confirmOrder(userId: number, orderId: number) {
+    const order = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+    });
+    if (!order) {
+      throw new ResponseError(404, "order not found");
+    } else if (order.userId !== userId) {
+      throw new ResponseError(
+        403,
+        "you does not have acceess of this resources"
+      );
+    } else if (order.orderStatus !== "DELIVERED") {
+      throw new ResponseError(400, "order was not delivered");
+    }
+
+    const updateOrder = await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        orderStatus: "CONFIRMED",
+      },
+    });
+    return updateOrder;
+  }
+
+  static async uploadPaymentProof(
+    userId: number,
+    wrapperOrderId: number,
+    file: Express.Multer.File
+  ) {
+    const order = await prisma.wrapperOrder.findUnique({
+      where: {
+        id: wrapperOrderId,
       },
     });
     if (!order) {
@@ -404,9 +435,9 @@ export class OrderService {
     }
     // get url file from bucket
     const { imageUrl: fileUrl } = await getUrlImageFromBucket(filePath);
-    const updateOrder = await prisma.order.update({
+    const updateOrder = await prisma.wrapperOrder.update({
       where: {
-        id: orderId,
+        id: wrapperOrderId,
       },
       data: {
         paymentProof: fileUrl,

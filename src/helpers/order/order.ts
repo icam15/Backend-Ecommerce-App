@@ -91,8 +91,8 @@ export const calculateShippingCost = async (
   service: string
 ) => {
   const costs = await ShippingService.getShippingCost({
-    origin: 501,
-    destination: 114,
+    origin,
+    destination,
     weight,
     courier,
   });

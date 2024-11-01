@@ -4,8 +4,8 @@ import { validate } from "../validation/validation";
 import { OrderValidation } from "../validation/order-validation";
 import {
   ApplyDiscountVoucherPayload,
-  CalculateOrderPerStorePayload,
-  CreateOrderPayload,
+  CalculateOrderPayload,
+  CreateWrapperOrderPayload,
 } from "../types/order-types";
 import { ResponseError } from "../helpers/response-error";
 
@@ -33,9 +33,9 @@ export class OrderController {
       const session = req.user;
       const payload = validate(
         OrderValidation.calculateOrderItemsByStoreValidation,
-        req.body as CalculateOrderPerStorePayload
+        req.body as CalculateOrderPayload
       );
-      const result = await OrderService.calculateOrderItemByStore(
+      const result = await OrderService.calculateOrderItemsByStore(
         session.id,
         payload
       );
@@ -71,7 +71,7 @@ export class OrderController {
       const session = req.user;
       const payload = validate(
         OrderValidation.createOrderValidation,
-        req.body as CreateOrderPayload
+        req.body as CreateWrapperOrderPayload
       );
       const { paymentLink } = await OrderService.createOrder(
         session.id,
