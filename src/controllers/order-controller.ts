@@ -51,11 +51,15 @@ export class OrderController {
 
   async applyDiscountVoucher(req: Request, res: Response, next: NextFunction) {
     try {
+      const session = req.user;
       const payload = validate(
         OrderValidation.applyDiscountVoucherValidation,
         req.body as ApplyDiscountVoucherPayload
       );
-      const result = await OrderService.applyDiscountVoucher(payload);
+      const result = await OrderService.applyDiscountVoucher(
+        session.id,
+        payload
+      );
       res.status(201).json({
         status: "success",
         message: "get discount voucher is success",

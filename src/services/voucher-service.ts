@@ -26,9 +26,9 @@ export class VoucherService {
   }
 
   static async findStoreAdmin(userId: number) {
-    const findAdmin = await prisma.storeAdmin.findUnique({
+    const findAdmin = await prisma.storeAdmin.findFirst({
       where: {
-        id: userId,
+        userId,
       },
     });
     if (!findAdmin) {

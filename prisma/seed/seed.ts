@@ -25,16 +25,52 @@ async function main() {
     const rajaOngkirBaseUrl = process.env.RAJA_ONGKIR_BASE_URL!;
     const headers = new Headers();
     headers.append("key", rajaOngkirApiKey);
-    // // get list of category
-    // const categories = listCategories(1);
-    // for (const category of categories) {
-    //   await prisma.category.create({
-    //     data: {
-    //       name: category.name,
-    //       ecommerceAdminId: category.ecommerceAdminId,
-    //     },
-    //   });
-    // }
+
+    // create users
+    await prisma.user.create({
+      data: {
+        displayName: "ecomerceAdmn",
+        email: "ecommerceAdmin@admin.com",
+        isVerified: "VERIFIED",
+        password:
+          "$2a$12$exrolhFsLDYWZ0B560QzF.3gkDnUbnKxRRbYhRgPBo8r6N5Qw1Esq",
+        userToken: { create: {} },
+        role: "ECOMMERCEADMIN",
+      },
+    });
+    await prisma.user.create({
+      data: {
+        displayName: "storeAdmin",
+        email: "storeAdmin@admin.com",
+        isVerified: "VERIFIED",
+        password:
+          "$2a$12$Ry/t4TYDrc8ym9Gl5V/.b.THkrh9YAAfhOIVXe9nXDfy.oRNit8Tq",
+        userToken: { create: {} },
+        role: "STOREADMIN",
+      },
+    });
+    await prisma.user.create({
+      data: {
+        displayName: "customer",
+        email: "customer@customer.com",
+        password:
+          "$2a$12$AYzQsG.WN5fVI8QHblkA0.M7T2tu/wUfqvYXicm0KoHeJNAfG9oYK",
+        isVerified: "VERIFIED",
+        role: "CUSTOMER",
+        userToken: { create: {} },
+      },
+    });
+
+    // get list of category
+    const categories = listCategories(1);
+    for (const category of categories) {
+      await prisma.category.create({
+        data: {
+          name: category.name,
+          ecommerceAdminId: category.ecommerceAdminId,
+        },
+      });
+    }
     // get list of province
     const getListProvince = await fetch(`${rajaOngkirBaseUrl}/province`, {
       method: "GET",

@@ -52,10 +52,10 @@ export const getCartItemsSelectedByStore = async (
     },
     include: { product: true },
   });
-  if (!cartItems) {
+  if (cartItems.length === 0) {
     throw new ResponseError(
       400,
-      "user cart does not contain items selected by the store"
+      "user cart does not contain product selected by the store"
     );
   }
   return cartItems;
@@ -165,7 +165,7 @@ export const applyDiscountVoucherStore = async (
     discount = (totalProductsPrice / 100) * findVoucher.discount;
   }
 
-  return { discount };
+  return { discount, userVoucher: isUserOwnTheVoucher };
 };
 
 export const mapStatusOrderToEnum = (status: string): OrderStatus | null => {
