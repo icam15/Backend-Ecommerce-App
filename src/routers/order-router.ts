@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { OrderController } from "../controllers/order-controller";
 import { uploadFile } from "../utils/multer";
+import { Authorization } from "../middleware/auth/authorization";
 
 export class OrderRouter {
   private router: Router;
@@ -30,6 +31,13 @@ export class OrderRouter {
       "/:orderId/payment-proof",
       uploadFile.single("file"),
       this.orderController.uploadPaymentProof
+    );
+
+    // admin store space
+    this.router.patch(
+      "/change-status-by-admin",
+      Authorization.storeAdmin,
+      this.orderController.changeStatusOrderByAdminStore
     );
   }
   getRouter(): Router {

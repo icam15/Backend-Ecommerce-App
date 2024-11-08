@@ -1,4 +1,3 @@
-import { OrderStatus } from "./../../node_modules/.prisma/client/index.d";
 import {
   applyDiscountVoucherStore,
   calculateShippingCost,
@@ -21,6 +20,7 @@ import dayjs from "dayjs";
 import { createPaymentLink } from "../helpers/order/payment";
 import { decode } from "base64-arraybuffer";
 import { getUrlImageFromBucket, uploadImageToBucket } from "../utils/supabase";
+import { OrderStatus } from "@prisma/client";
 
 export class OrderService {
   static async getCheckoutCart(userId: number) {
@@ -291,7 +291,7 @@ export class OrderService {
         );
 
         // update the store
-        const updateWrapper = await tx.wrapperOrder.update({
+        await tx.wrapperOrder.update({
           where: {
             id: addWrapperOrder.id,
           },
@@ -360,6 +360,11 @@ export class OrderService {
       where: {
         userId,
         orderStatus: orderStatus,
+      },
+      include: {
+        orderItem: {
+          include: { product: { include: { productImage: true } } },
+        },
       },
     });
     if (orders.length === 0) {
@@ -474,17 +479,42 @@ export class OrderService {
     return updateOrder;
   }
 
-  // static async changeOrderStoreStatusByAdminStore(
-  //   userId: number,
-  //   payload: ChangeOrderStatusPayload
-  // ) {
-  //   const orderStore = await prisma.orderStore.findUnique({
-  //     where: {
-  //       id: payload.orderStoreId,
-  //     },
-  //   });
-  //   if (!order) {
-  //     throw new ResponseError(404, "order not found");
-  //   }
-  // }
+  static async changeOrderStoreStatusByAdminStore(
+    userId: number,
+    payload: ChangeOrderStatusPayload
+  ) {
+    const newStatus = payload.newStatus as OrderStatus;
+    const admin = await prisma.storeAdmin.findFirst({ where: { userId } });
+
+    const order = await prisma.order.findUnique({
+      where: {
+        id: payload.orderStoreId,
+      },
+    });
+    if (!order) {
+      throw new ResponseError(404, "order not found");
+    } else if (admin?.storeId !== order.storeId) {
+      throw new ResponseError(400, "you are not admin of the store");
+    }
+
+    if (
+      !Object.values(OrderStatus).includes(payload.newStatus as OrderStatus)
+    ) {
+      throw new ResponseError(400, `invalid status:${payload.newStatus}`);
+    }
+
+    const allowedUpdateStatus: OrderStatus[] = ["PROCESS", "SHIPPING"];
+    if (!allowedUpdateStatus.includes(newStatus)) {
+      throw new ResponseError(400, "unsupported new status");
+    }
+
+    return await prisma.order.update({
+      where: {
+        id: order.id,
+      },
+      data: {
+        orderStatus: newStatus,
+      },
+    });
+  }
 }

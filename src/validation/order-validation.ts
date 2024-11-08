@@ -1,4 +1,4 @@
-import { CourierType } from "@prisma/client";
+import { CourierType, OrderStatus } from "@prisma/client";
 import { string, z } from "zod";
 
 export class OrderValidation {
@@ -25,5 +25,6 @@ export class OrderValidation {
 
   static readonly changeOrderStatusValidation = z.object({
     orderStoreId: z.number(),
+    newStatus: z.nativeEnum(OrderStatus),
   });
 }

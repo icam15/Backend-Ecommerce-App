@@ -5,6 +5,7 @@ import { OrderValidation } from "../validation/order-validation";
 import {
   ApplyDiscountVoucherPayload,
   CalculateOrderPayload,
+  ChangeOrderStatusPayload,
   CreateWrapperOrderPayload,
 } from "../types/order-types";
 import { ResponseError } from "../helpers/response-error";
@@ -187,6 +188,31 @@ export class OrderController {
       res.status(201).json({
         status: "success",
         message: "upload payment proof is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async changeStatusOrderByAdminStore(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const payload = validate(
+        OrderValidation.changeOrderStatusValidation,
+        req.body as ChangeOrderStatusPayload
+      );
+      const result = await OrderService.changeOrderStoreStatusByAdminStore(
+        session.id,
+        payload
+      );
+      res.status(200).json({
+        status: "success",
+        message: "change order status is success",
         result,
       });
     } catch (e) {
