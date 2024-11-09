@@ -2,6 +2,7 @@ import {
   applyDiscountVoucherStore,
   calculateShippingCost,
   calculateTotalPriceAndWeight,
+  cancelOrder,
   getCartItemsSelectedByStore,
   getExistStore,
   getUserAddress,
@@ -12,6 +13,7 @@ import { prisma } from "../libs/prisma";
 import {
   ApplyDiscountVoucherPayload,
   CalculateOrderPayload,
+  CancelOrderPayload,
   ChangeOrderStatusPayload,
   CreateWrapperOrderPayload,
 } from "../types/order-types";
@@ -380,6 +382,7 @@ export class OrderService {
       },
       include: {
         wrapperOrder: true,
+        orderItem: true,
       },
     });
     if (!order) {
@@ -398,12 +401,8 @@ export class OrderService {
         "order cannot be canceled because payment proof was uploaded"
       );
     }
-    await prisma.order.update({
-      where: {
-        id: orderId,
-      },
-      data: { orderStatus: "CANCELLED" },
-    });
+    const updateOrder = await cancelOrder(order.id, order.orderItem);
+    return updateOrder;
   }
 
   static async confirmOrder(userId: number, orderId: number) {
@@ -516,5 +515,34 @@ export class OrderService {
         orderStatus: newStatus,
       },
     });
+  }
+
+  static async cancelOrderByAdminStore(
+    userId: number,
+    payload: CancelOrderPayload
+  ) {
+    const adminStore = await prisma.storeAdmin.findFirst({
+      where: { userId },
+    });
+    if (!adminStore) {
+      throw new ResponseError(400, "store admin not found");
+    }
+
+    const order = await prisma.order.findUnique({
+      where: {
+        id: payload.orderStoreId,
+      },
+      include: { orderItem: true },
+    });
+    if (!order) {
+      throw new ResponseError(404, "order not found");
+    } else if (order.storeId !== adminStore.storeId) {
+      throw new ResponseError(400, "you are not admin of the order store id");
+    }
+    if (order.orderStatus !== "WAITING_FOR_PAYMENT") {
+      throw new ResponseError(400, "order cannot be canceled");
+    }
+    const updateOrder = await cancelOrder(order.id, order.orderItem);
+    return updateOrder;
   }
 }

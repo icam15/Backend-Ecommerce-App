@@ -1,7 +1,13 @@
 import { Response, response } from "express";
 import { prisma } from "../../libs/prisma";
 import { ResponseError } from "../response-error";
-import { Cart, CartItem, OrderStatus, Product } from "@prisma/client";
+import {
+  Cart,
+  CartItem,
+  OrderItem,
+  OrderStatus,
+  Product,
+} from "@prisma/client";
 import { ShippingService } from "../../services/shipping-service";
 import dayjs from "dayjs";
 import { OrderItemTypes } from "../../types/order-types";
@@ -180,4 +186,27 @@ export const mapStatusOrderToEnum = (status: string): OrderStatus | null => {
   };
   console.log(statusMap[status.toLowerCase()]);
   return statusMap[status.toLowerCase()] || null;
+};
+
+export const cancelOrder = async (orderId: number, orderItems: OrderItem[]) => {
+  const transaction = [
+    prisma.order.update({
+      where: { id: orderId },
+      data: { orderStatus: "CANCELLED" },
+    }),
+    ...orderItems.flatMap((item) => {
+      return [
+        prisma.stock.update({
+          where: {
+            productId: item.productId,
+          },
+          data: {
+            amount: item.quantity,
+          },
+        }),
+      ];
+    }),
+  ];
+  const updateOrder = await prisma.$transaction(transaction);
+  return updateOrder;
 };

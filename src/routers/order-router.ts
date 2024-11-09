@@ -39,6 +39,11 @@ export class OrderRouter {
       Authorization.storeAdmin,
       this.orderController.changeStatusOrderByAdminStore
     );
+    this.router.patch(
+      "/cancel-by-admin",
+      Authorization.storeAdmin,
+      this.orderController.cancelOrderByAdminStore
+    );
   }
   getRouter(): Router {
     return this.router;

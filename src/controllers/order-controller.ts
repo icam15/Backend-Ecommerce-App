@@ -5,6 +5,7 @@ import { OrderValidation } from "../validation/order-validation";
 import {
   ApplyDiscountVoucherPayload,
   CalculateOrderPayload,
+  CancelOrderPayload,
   ChangeOrderStatusPayload,
   CreateWrapperOrderPayload,
 } from "../types/order-types";
@@ -213,6 +214,31 @@ export class OrderController {
       res.status(200).json({
         status: "success",
         message: "change order status is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async cancelOrderByAdminStore(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const payload = validate(
+        OrderValidation.cancelOrderValidation,
+        req.body as CancelOrderPayload
+      );
+      const result = await OrderService.cancelOrderByAdminStore(
+        session.id,
+        payload
+      );
+      res.status(200).json({
+        status: "success",
+        message: "cancel order is success",
         result,
       });
     } catch (e) {

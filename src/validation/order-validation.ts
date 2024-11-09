@@ -27,4 +27,9 @@ export class OrderValidation {
     orderStoreId: z.number(),
     newStatus: z.nativeEnum(OrderStatus),
   });
+
+  static readonly cancelOrderValidation = z.object({
+    orderStoreId: z.number(),
+    reason: z.string(),
+  });
 }

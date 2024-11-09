@@ -38,3 +38,8 @@ export type ChangeOrderStatusPayload = {
   orderStoreId: number;
   newStatus: string;
 };
+
+export type CancelOrderPayload = {
+  orderStoreId: number;
+  reason: string;
+};
