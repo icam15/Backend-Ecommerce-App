@@ -478,23 +478,38 @@ export class OrderService {
     return updateOrder;
   }
 
-  static async changeOrderStoreStatusByAdminStore(
+  static async checkAdminStoreByOrderStore(userId: number, orderId: number) {
+    const admin = await prisma.storeAdmin.findFirst({
+      where: {
+        userId,
+      },
+    });
+    if (!admin) {
+      throw new ResponseError(404, "admin not found");
+    }
+    const order = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+      include: { orderItem: true },
+    });
+    if (!order) {
+      throw new ResponseError(404, "order not found");
+    } else if (order.storeId !== admin.storeId) {
+      throw new ResponseError(400, "you are not allowwed of this service");
+    }
+    return { order };
+  }
+
+  static async updateOrderStateByAdminStore(
     userId: number,
     payload: ChangeOrderStatusPayload
   ) {
     const newStatus = payload.newStatus as OrderStatus;
-    const admin = await prisma.storeAdmin.findFirst({ where: { userId } });
-
-    const order = await prisma.order.findUnique({
-      where: {
-        id: payload.orderStoreId,
-      },
-    });
-    if (!order) {
-      throw new ResponseError(404, "order not found");
-    } else if (admin?.storeId !== order.storeId) {
-      throw new ResponseError(400, "you are not admin of the store");
-    }
+    const { order } = await this.checkAdminStoreByOrderStore(
+      userId,
+      payload.orderStoreId
+    );
 
     if (
       !Object.values(OrderStatus).includes(payload.newStatus as OrderStatus)
@@ -502,9 +517,20 @@ export class OrderService {
       throw new ResponseError(400, `invalid status:${payload.newStatus}`);
     }
 
-    const allowedUpdateStatus: OrderStatus[] = ["PROCESS", "SHIPPING"];
-    if (!allowedUpdateStatus.includes(newStatus)) {
-      throw new ResponseError(400, "unsupported new status");
+    const allowwedTransitionStatus: { [key in OrderStatus]: OrderStatus[] } = {
+      [OrderStatus.WAITING_FOR_PAYMENT]: [],
+      [OrderStatus.WAITING_FOR_CONFIRMATION]: [],
+      [OrderStatus.PROCESS]: [OrderStatus.SHIPPING],
+      [OrderStatus.SHIPPING]: [OrderStatus.DELIVERED],
+      [OrderStatus.DELIVERED]: [],
+      [OrderStatus.CONFIRMED]: [],
+      [OrderStatus.CANCELLED]: [],
+    };
+    if (!allowwedTransitionStatus[order.orderStatus].includes(newStatus)) {
+      throw new ResponseError(
+        400,
+        `unsupported transition order status to ${newStatus}`
+      );
     }
 
     return await prisma.order.update({
@@ -521,28 +547,33 @@ export class OrderService {
     userId: number,
     payload: CancelOrderPayload
   ) {
-    const adminStore = await prisma.storeAdmin.findFirst({
-      where: { userId },
-    });
-    if (!adminStore) {
-      throw new ResponseError(400, "store admin not found");
-    }
-
-    const order = await prisma.order.findUnique({
-      where: {
-        id: payload.orderStoreId,
-      },
-      include: { orderItem: true },
-    });
-    if (!order) {
-      throw new ResponseError(404, "order not found");
-    } else if (order.storeId !== adminStore.storeId) {
-      throw new ResponseError(400, "you are not admin of the order store id");
-    }
-    if (order.orderStatus !== "WAITING_FOR_PAYMENT") {
+    const { order } = await this.checkAdminStoreByOrderStore(
+      userId,
+      payload.orderStoreId
+    );
+    if (
+      order.orderStatus === OrderStatus.SHIPPING ||
+      order.orderStatus === OrderStatus.DELIVERED ||
+      order.orderStatus === OrderStatus.CONFIRMED
+    ) {
       throw new ResponseError(400, "order cannot be canceled");
     }
     const updateOrder = await cancelOrder(order.id, order.orderItem);
     return updateOrder;
+  }
+
+  static async getAllOrders(userId: number) {
+    const ecommerceAdmin = await prisma.user.findUnique({
+      where: { id: userId, role: "ECOMMERCEADMIN" },
+    });
+    if (!ecommerceAdmin) {
+      throw new ResponseError(400, "you cant access this resource");
+    }
+
+    const orders = await prisma.order.findMany({});
+    if (orders.length === 0) {
+      throw new ResponseError(400, "there are any order");
+    }
+    return orders;
   }
 }

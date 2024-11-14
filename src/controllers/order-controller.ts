@@ -207,7 +207,7 @@ export class OrderController {
         OrderValidation.changeOrderStatusValidation,
         req.body as ChangeOrderStatusPayload
       );
-      const result = await OrderService.changeOrderStoreStatusByAdminStore(
+      const result = await OrderService.updateOrderStateByAdminStore(
         session.id,
         payload
       );
@@ -239,6 +239,20 @@ export class OrderController {
       res.status(200).json({
         status: "success",
         message: "cancel order is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async getAllOrders(req: Request, res: Response, next: NextFunction) {
+    try {
+      const session = req.user;
+      const result = await OrderService.getAllOrders(session.id);
+      res.status(200).json({
+        status: "success",
+        message: "get all order is success",
         result,
       });
     } catch (e) {
