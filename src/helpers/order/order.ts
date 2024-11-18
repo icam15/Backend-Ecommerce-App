@@ -210,3 +210,71 @@ export const cancelOrder = async (orderId: number, orderItems: OrderItem[]) => {
   const updateOrder = await prisma.$transaction(transaction);
   return updateOrder;
 };
+
+export const mapStatusOrderToEnum = (status: string): OrderStatus | null => {
+  const statusMap: { [key: string]: OrderStatus } = {
+    awaiting_for_payment: OrderStatus.WAITING_FOR_PAYMENT,
+    awaiting_for_confirmation: OrderStatus.WAITING_FOR_CONFIRMATION,
+    cancelled: OrderStatus.CANCELLED,
+    process: OrderStatus.PROCESS,
+    shipping: OrderStatus.SHIPPING,
+    delivered: OrderStatus.DELIVERED,
+    confirmed: OrderStatus.CONFIRMED,
+  };
+  console.log(statusMap[status.toLowerCase()]);
+  return statusMap[status.toLowerCase()] || null;
+};
+
+// export const cancelOrderTransaction = async (
+//   userId: number,
+//   orderId: number
+// ) => {
+//   const order = await prisma.order.findUnique({
+//     where: {
+//       id: orderId,
+//     },
+//     include: { orderStore: { include: { orderItem: true } } },
+//   });
+//   if (!order || order.userId !== userId) {
+//     throw new ResponseError(404, "order not found");
+//   } else if (order.orderStatus !== "WAITING_FOR_PAYMENT") {
+//     throw new ResponseError(400, "order cannot be cancel");
+//   }
+//   let orderItems = [];
+//   for (const orderStore of order.orderStore) {
+//     const orderItemsDb = await prisma.orderItem.findMany({
+//       where: {
+//         orderStoreId: orderStore.id,
+//       },
+//     });
+//     if (orderItems.length === 0) {
+//       throw new ResponseError(
+//         404,
+//         `there is not order item with order Store id:${orderStore.id}`
+//       );
+//     }
+//     orderItems.push(...orderItemsDb);
+//   }
+
+//   const transaction = [
+//     // update status order
+//     prisma.order.update({
+//       where: { id: orderId },
+//       data: { orderStatus: "CANCELLED" },
+//     }),
+//     // return back stock item
+//     ...orderItems.flatMap((orderItem) => {
+//       return [
+//         prisma.stock.update({
+//           where: {
+//             productId: orderItem.id,
+//           },
+//           data: {
+//             amount: { increment: orderItem.quantity },
+//           },
+//         }),
+//       ];
+//     }),
+//   ];
+//   await prisma.$transaction(transaction);
+// };

@@ -439,7 +439,6 @@ model OrderItem {
 
   // Relation
   order Order @relation(fields: [orderId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
 
 
   @@map("order_item")
