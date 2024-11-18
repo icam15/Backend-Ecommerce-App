@@ -9,6 +9,9 @@ import { ProductRouter } from "./product-router";
 import { EtalaseRouter } from "./etalase-router";
 import { CartRouter } from "./cart-router";
 import { VoucherRouter } from "./voucher-router";
+import { ShippingRouter } from "./shipping-router";
+import { OrderRouter } from "./order-router";
+import { PaymentRouter } from "./payment-router";
 
 export class RootRouter {
   private router: Router;
@@ -21,6 +24,9 @@ export class RootRouter {
   private etalaseRouter: EtalaseRouter;
   private cartRouter: CartRouter;
   private voucherRouter: VoucherRouter;
+  private shippingRouter: ShippingRouter;
+  private orderRouter: OrderRouter;
+  private paymentRouter: PaymentRouter;
   constructor() {
     this.router = Router();
     this.authRouter = new AuthRouter();
@@ -32,6 +38,10 @@ export class RootRouter {
     this.etalaseRouter = new EtalaseRouter();
     this.cartRouter = new CartRouter();
     this.voucherRouter = new VoucherRouter();
+    this.shippingRouter = new ShippingRouter();
+    this.orderRouter = new OrderRouter();
+    this.paymentRouter = new PaymentRouter();
+
     this.initializeRouter();
   }
   private initializeRouter(): void {
@@ -64,6 +74,13 @@ export class RootRouter {
       authenticationUser,
       this.voucherRouter.getRouter()
     );
+    this.router.use(
+      "/shipping",
+      authenticationUser,
+      this.shippingRouter.getRoute()
+    );
+    this.router.use("/order", authenticationUser, this.orderRouter.getRouter());
+    this.router.use("payment", this.paymentRouter.getRouter());
   }
   getRouter() {
     return this.router;

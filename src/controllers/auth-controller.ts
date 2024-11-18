@@ -15,6 +15,7 @@ import {
   verifyRefreshToken,
 } from "../utils/token/auth-token";
 import { oauthUrl } from "../libs/oauth2/googleClient";
+import { z } from "zod";
 
 export class AuthController {
   async signUpUser(req: Request, res: Response, next: NextFunction) {
@@ -178,7 +179,7 @@ export class AuthController {
     next: NextFunction
   ) {
     try {
-      const { code } = req.query;
+      const code = z.string().parse(req.query);
       const { email, role, userId } = await AuthService.handleSignUpWithGoogle(
         code
       );

@@ -23,10 +23,10 @@ export class CartServcie {
         userId,
       },
     });
-    if (!existCart) {
-      throw new ResponseError(400, "you does not have cart");
-    }
-    return existCart;
+    // if (!existCart) {
+    //   throw new ResponseError(400, "you does not have cart");
+    // }
+    return existCart!;
   }
 
   static async getCartItems(userId: number) {
@@ -94,6 +94,7 @@ export class CartServcie {
         quantity: Number(payload.quantity),
         productId: findProductItem.id,
         storeId: findProductItem.storeId,
+        weight: findProductItem.weight,
       },
     });
     return newCartItem;

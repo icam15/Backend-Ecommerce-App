@@ -45,6 +45,21 @@ enum DiscountType {
   PERCENT_DISCOUNT
 }
 
+enum ShippingServiceType {
+  REG
+  SPS
+  YES
+  OKE
+}
+
+enum CourierType {
+  JNE
+  POS
+  SICEPAT
+}
+
+
+
 model User{
   id Int @id @default(autoincrement())
   email String @unique
@@ -67,6 +82,8 @@ model User{
   store Store?
   voucher Voucher[]
   userVoucher UserVoucher[]
+  wrapperOrder WrapperOrder[]
+  order Order[]
 }
 
 model UserToken{
@@ -175,6 +192,7 @@ model Store{
   storeEtalase StoreEtalase[]
   cartItem CartItem[]
   voucher Voucher[]
+  order Order[]
 
   @@map("store")
 }
@@ -215,6 +233,7 @@ model Product {
   productImage ProductImage[]
   stock Stock?
   cartItem CartItem[]
+  orderItem OrderItem[]
   
 
   
@@ -287,6 +306,7 @@ model CartItem {
   cartId Int @map("cart_id")
   storeId Int @map("store_id")
   quantity Int
+  weight Float
   isSelected Boolean @default(false) @map("is_selected")
   createAt DateTime @default(now()) @map("create_at")
   updateAt DateTime @updatedAt @map("update_at")
@@ -324,6 +344,7 @@ model Voucher {
   storeAdmin StoreAdmin? @relation(fields: [storeAdminId], references: [id])
   ecommerceAdmin User? @relation(fields: [ecommerceAdminId], references: [id])
   userVoucher UserVoucher[]
+  order Order[]
 
 
   @@map("voucher")
@@ -344,6 +365,85 @@ model UserVoucher {
 
 
   @@map("user_voucher")
+}
+
+enum OrderStatus {
+  WAITING_FOR_PAYMENT
+  WAITING_FOR_CONFIRMATION
+  SHIPPING
+  PROCESS
+  DELIVERED
+  CONFIRMED
+  CANCELLED
+}
+
+enum OrderPaymentStatus {
+  WAITING_FOR_PAYMENT
+  ALREADY_PAID
+}
+
+model WrapperOrder {
+  id Int @id @default(autoincrement())
+  userId Int @map("user_id")
+  note String?
+  orderStatus OrderPaymentStatus @map("order_payment_status")
+  totalPrice Int @map("total_price")
+  shippingCost Int @map("shipping_cost")
+  discountProducts Int? @map("discount_products")
+  discountShippingCost Int? @map("discount_shipping_cost")
+  totalPayment Int @map("total_payment")
+  paymentLink String? @map("payment_link")
+  paymentProof String? @map("payment_proof")
+
+  deleteAt DateTime? @map("delete_at")
+  createAt DateTime @default(now()) @map("create_at")
+  updateAt DateTime @updatedAt @map("update_at")
+
+  // Relation
+  user User @relation(fields: [userId], references: [id])
+  order Order[]
+
+  @@map("wrapper_order")
+}
+
+model Order {
+ id Int @id @default(autoincrement())
+ storeId Int @map("store_id")
+ wrapperOrderId Int @map("wrapper_order_id")
+ userId Int @map("user_id")
+ service String
+ courier CourierType
+ discount Int @map("discount_products")
+ storeVoucherId Int? @map("store_voucher_id")
+ totalPrice Int  @map("total_price")
+ orderStatus OrderStatus @default(value:WAITING_FOR_PAYMENT) @map("order_status") 
+
+ createAt DateTime @default(now()) @map("create_at")
+ updateAt DateTime @updatedAt @map("update_at")
+
+ // Relation
+ voucher Voucher? @relation(fields: [storeVoucherId], references: [id])
+ store Store @relation(fields: [storeId], references: [id])
+ wrapperOrder WrapperOrder @relation(fields: [wrapperOrderId], references: [id])
+ user User @relation(fields: [userId], references: [id])
+ orderItem OrderItem[]
+
+ @@map("order_store")
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+  productId Int @map("product_id")
+  quantity Int 
+  orderId Int
+
+  // Relation
+  order Order @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+
+  @@map("order_item")
+
 }
 
 

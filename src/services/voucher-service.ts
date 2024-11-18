@@ -26,9 +26,9 @@ export class VoucherService {
   }
 
   static async findStoreAdmin(userId: number) {
-    const findAdmin = await prisma.storeAdmin.findUnique({
+    const findAdmin = await prisma.storeAdmin.findFirst({
       where: {
-        id: userId,
+        userId,
       },
     });
     if (!findAdmin) {
@@ -328,18 +328,20 @@ export class VoucherService {
     }
 
     // check if voucher is store voucher
-    const storeAdmin = await this.findStoreAdmin(userId);
-    if (
-      existVoucher.storeAdminId &&
-      existVoucher.storeId !== storeAdmin.storeId
-    ) {
-      throw new ResponseError(400, "you does not have access of this voucher");
+    if (existVoucher.storeAdminId) {
+      const storeAdmin = await this.findStoreAdmin(userId);
+      if (existVoucher.storeId !== storeAdmin.storeId) {
+        throw new ResponseError(
+          400,
+          "you does not have access of this voucher"
+        );
+      }
     }
 
     // assign voucher to user
     const assignVoucher = await prisma.userVoucher.create({
       data: {
-        userId,
+        userId: payload.toUserId,
         isUsed: false,
         voucherId: payload.voucherId,
         expireAt: existVoucher.expireAt,

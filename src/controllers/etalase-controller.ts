@@ -9,6 +9,7 @@ import {
   UpdateEtalaseStorePayload,
 } from "../types/etalase-types";
 import { logger } from "../libs/logger";
+import { z } from "zod";
 
 export class EtalaseController {
   async createEtalase(req: Request, res: Response, next: NextFunction) {
@@ -50,7 +51,7 @@ export class EtalaseController {
       );
       const icon = req.file!;
       logger.info(payload);
-      const { etalaseId } = req.params;
+      const etalaseId = z.string().parse(req.params.etalaseId);
       await EtalaseService.updateEtalaseStore(
         session.id,
         Number(etalaseId),
@@ -73,7 +74,7 @@ export class EtalaseController {
   ) {
     try {
       const session = req.user;
-      const { etalaseId } = req.params;
+      const etalaseId = z.string().parse(req.params.etalaseId);
       await EtalaseService.deleteEtalaseStore(session.id, parseInt(etalaseId));
       res.status(201).json({
         status: "success",
@@ -90,7 +91,7 @@ export class EtalaseController {
     next: NextFunction
   ) {
     try {
-      const { etalaseId } = req.params;
+      const etalaseId = z.string().parse(req.params.etalaseId);
       const result = await EtalaseService.getEtalaseById(parseInt(etalaseId));
       res.status(201).json({
         status: "success",
@@ -108,7 +109,7 @@ export class EtalaseController {
     next: NextFunction
   ) {
     try {
-      const { etalaseId } = req.params;
+      const etalaseId = z.string().parse(req.params.etalaseId);
       const result = await EtalaseService.getProductsByEtalaseId(
         Number(etalaseId)
       );

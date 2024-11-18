@@ -7,6 +7,7 @@ import {
   CreateProductPayload,
   UpdateProductPayload,
 } from "../types/product-types";
+import { z } from "zod";
 
 export class ProductController {
   async createProduct(req: Request, res: Response, next: NextFunction) {
@@ -40,7 +41,7 @@ export class ProductController {
     next: NextFunction
   ) {
     try {
-      const { productId } = req.params;
+      const productId = z.string().parse(req.params.productId);
       const session = req.user;
       const payload = validate(
         ProductValidation.updateProductValidation,
@@ -66,7 +67,12 @@ export class ProductController {
     next: NextFunction
   ) {
     try {
-      const { productId, imageId } = req.params;
+      const paramsProperty = z
+        .object({
+          productId: z.string(),
+          imageId: z.string(),
+        })
+        .parse({ ...req.params });
       const session = req.user;
       const image = req.file;
       if (!image) {
@@ -74,8 +80,8 @@ export class ProductController {
       }
       await ProductService.updateProductImage(
         session.id,
-        parseInt(productId),
-        parseInt(imageId),
+        parseInt(paramsProperty.productId),
+        parseInt(paramsProperty.imageId),
         image
       );
       res.status(201).json({
@@ -93,7 +99,7 @@ export class ProductController {
     next: NextFunction
   ) {
     try {
-      const { productId } = req.params;
+      const productId = z.string().parse(req.params.productId);
       const result = await ProductService.getProductById(parseInt(productId));
       res.status(201).json({
         status: "success",
@@ -112,7 +118,7 @@ export class ProductController {
   ) {
     try {
       const session = req.user;
-      const { productId } = req.params;
+      const productId = z.string().parse(req.params.productId);
       await ProductService.deleteProduct(session.id, Number(productId));
       res.status(201).json({
         status: "success",
@@ -130,7 +136,7 @@ export class ProductController {
   ) {
     try {
       const session = req.user;
-      const { productId } = req.params;
+      const productId = z.string().parse(req.params.productId);
       await ProductService.setProductToInActive(session.id, Number(productId));
       res.status(201).json({
         status: "success",
@@ -148,7 +154,7 @@ export class ProductController {
   ) {
     try {
       const session = req.user;
-      const { productId } = req.params;
+      const productId = z.string().parse(req.params.productId);
       await ProductService.setProductToActive(session.id, Number(productId));
       res.status(201).json({
         status: "succeess",

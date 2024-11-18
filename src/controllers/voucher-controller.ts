@@ -8,6 +8,7 @@ import {
 } from "../types/voucher-types";
 import { ResponseError } from "../helpers/response-error";
 import { VoucherService } from "../services/voucher-service";
+import { z } from "zod";
 
 export class voucherController {
   async createEcommerceVoucher(
@@ -72,7 +73,7 @@ export class voucherController {
     next: NextFunction
   ) {
     try {
-      const { voucherId } = req.params;
+      const voucherId = z.string().parse(req.params.voucherId);
       const result = await VoucherService.getVoucher(Number(voucherId));
       res.status(201).json({
         status: "success",
@@ -91,7 +92,7 @@ export class voucherController {
   ) {
     try {
       const session = req.user;
-      const { voucherId } = req.params;
+      const voucherId = z.string().parse(req.params.voucherId);
       const payload = validate(
         VoucherValidation.updateVoucherValidation,
         req.body as UpdateVoucherPayload
@@ -118,7 +119,7 @@ export class voucherController {
   ) {
     try {
       const session = req.user;
-      const { voucherId } = req.params;
+      const voucherId = z.string().parse(req.params.voucherId);
       const payload = validate(
         VoucherValidation.updateVoucherValidation,
         req.body as UpdateVoucherPayload
@@ -145,7 +146,7 @@ export class voucherController {
   ) {
     try {
       const session = req.user;
-      const { voucherId } = req.params;
+      const voucherId = z.string().parse(req.params.voucherId);
       await VoucherService.deleteEcommerceVoucher(
         session.id,
         Number(voucherId)
@@ -166,7 +167,7 @@ export class voucherController {
   ) {
     try {
       const session = req.user;
-      const { voucherId } = req.params;
+      const voucherId = z.string().parse(req.params.voucherId);
       await VoucherService.deleteStoreVoucher(session.id, Number(voucherId));
       res.status(201).json({
         status: "success",
@@ -184,7 +185,7 @@ export class voucherController {
   ) {
     try {
       const session = req.user;
-      const { voucherId } = req.params;
+      const voucherId = z.string().parse(req.params.voucherId);
       const result = await VoucherService.claimVoucher(
         session.id,
         Number(voucherId)

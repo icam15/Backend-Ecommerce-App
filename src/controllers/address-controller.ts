@@ -6,6 +6,7 @@ import {
   UpdateUserAddressPayload,
 } from "../types/address-types";
 import { AddressService } from "../services/address-service";
+import { z } from "zod";
 
 export class AddressController {
   async createAddress(req: Request, res: Response, next: NextFunction) {
@@ -35,7 +36,7 @@ export class AddressController {
     next: NextFunction
   ) {
     try {
-      const { addressId } = req.params;
+      const addressId = z.string().parse(req.params.addressId);
       const session = req.user;
       const payload = validate(
         AddressValidation.updateUserAddressValidation,
@@ -63,7 +64,7 @@ export class AddressController {
   ) {
     try {
       const session = req.user;
-      const { addressId } = req.params;
+      const addressId = z.string().parse(req.params.addressId);
       await AddressService.setMainUserAddress(session.id, parseInt(addressId));
       res.status(201).json({
         status: "success",
@@ -81,7 +82,7 @@ export class AddressController {
   ) {
     try {
       const session = req.user;
-      const { addressId } = req.params;
+      const addressId = z.string().parse(req.params.addressId);
       const result = await AddressService.getUserAddress(
         session.id,
         parseInt(addressId)
@@ -103,7 +104,7 @@ export class AddressController {
   ) {
     try {
       const session = req.user;
-      const { addressId } = req.params;
+      const addressId = z.string().parse(req.params.addressId);
       await AddressService.deleteUserAddress(session.id, parseInt(addressId));
       res.status(201).json({
         status: "success",
