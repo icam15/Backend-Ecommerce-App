@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { NextFunction, Request, Response } from "express";
 import { OrderService } from "../services/order-service";
 import { validate } from "../validation/validation";
@@ -100,7 +101,7 @@ export class OrderController {
   ) {
     try {
       const session = req.user;
-      const { orderId } = req.params;
+      const orderId = z.string().parse(req.params.orderId);
       const result = await OrderService.getOrder(session.id, Number(orderId));
       res.status(201).json({
         status: "success",
@@ -120,7 +121,7 @@ export class OrderController {
   ) {
     try {
       const session = req.user;
-      const { status } = req.params;
+      const status = z.string().parse(req.params.status);
       const result = await OrderService.getOrderByStatus(session.id, status);
       res.status(201).json({
         status: "success",
@@ -139,7 +140,7 @@ export class OrderController {
   ) {
     try {
       const session = req.user;
-      const { orderId } = req.params;
+      const orderId = z.string().parse(req.params.orderId);
       await OrderService.cancelOrder(session.id, Number(orderId));
       res.status(201).json({
         status: "success",
@@ -157,7 +158,7 @@ export class OrderController {
   ) {
     try {
       const session = req.user;
-      const { orderId } = req.params;
+      const orderId = z.string().parse(req.params.orderId);
       const result = await OrderService.confirmOrder(
         session.id,
         Number(orderId)
@@ -180,7 +181,7 @@ export class OrderController {
     try {
       const session = req.user;
       if (!req.file) throw new ResponseError(400, "no file uploaded");
-      const { orderId } = req.params;
+      const orderId = z.string().parse(req.params.orderId);
       const result = await OrderService.uploadPaymentProof(
         session.id,
         Number(orderId),

@@ -1,3 +1,4 @@
+import { string, z } from "zod";
 import { NextFunction, Request, Response } from "express";
 import { CategoryService } from "../services/category-service";
 import { validate } from "../validation/validation";
@@ -32,7 +33,7 @@ export class CategoryController {
     next: NextFunction
   ) {
     try {
-      const { categoryId } = req.params;
+      const categoryId = z.string().parse(req.params.categoryId);
       const session = req.user;
       const payload = validate(
         CategoryValidation.UpdateCategoryValidation,
@@ -60,7 +61,7 @@ export class CategoryController {
   ) {
     try {
       const session = req.user;
-      const { categoryId } = req.params;
+      const categoryId = z.string().parse(req.params.categoryId);
       await CategoryService.deleteCategory(session.id, parseInt(categoryId));
       res.status(201).json({
         status: "success",
@@ -77,7 +78,7 @@ export class CategoryController {
     next: NextFunction
   ) {
     try {
-      const { categoryId } = req.params;
+      const categoryId = z.string().parse(req.params.categoryId);
       const result = await CategoryService.getCategoryById(
         parseInt(categoryId)
       );

@@ -87,7 +87,7 @@ export class CartController {
   ) {
     try {
       const session = req.user;
-      const { isSelected } = req.body;
+      const isSelected = z.boolean().parse(req.body.isSelected);
       if (typeof isSelected !== "boolean" || isSelected === undefined) {
         throw new ResponseError(403, "isSelected field required boolean type");
       }
@@ -137,7 +137,7 @@ export class CartController {
   ) {
     try {
       const session = req.user;
-      const { itemId } = req.params;
+      const itemId = z.string().parse(req.params.itemId);
       if (itemId === undefined) {
         throw new ResponseError(400, "itemId field is required");
       }

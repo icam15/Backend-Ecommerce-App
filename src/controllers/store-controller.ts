@@ -8,6 +8,7 @@ import {
   DeleteStoreAdminPayload,
   UpdateStorePayload,
 } from "../types/store-types";
+import { z } from "zod";
 
 export class StoreController {
   async createStore(req: Request, res: Response, next: NextFunction) {
@@ -36,7 +37,7 @@ export class StoreController {
     try {
       const image = req.file!;
       const session = req.user;
-      const { storeId } = req.params;
+      const storeId = z.string().parse(req.params.storeId);
       await StoreService.UpdateStoreImage(session.id, parseInt(storeId), image);
       res.status(201).json({
         status: "success",
@@ -53,7 +54,7 @@ export class StoreController {
     next: NextFunction
   ) {
     try {
-      const { storeId } = req.params;
+      const storeId = z.string().parse(req.params.storeId);
       const result = await StoreService.getStoreById(parseInt(storeId));
       res.status(201).json({
         status: "success",
@@ -76,7 +77,7 @@ export class StoreController {
         req.body as UpdateStorePayload
       );
       const session = req.user;
-      const { storeId } = req.params;
+      const storeId = z.string().parse(req.params.storeId);
       await StoreService.updateStore(session.id, parseInt(storeId), payload);
       res.status(201).json({
         status: "success",
@@ -92,7 +93,7 @@ export class StoreController {
     next: NextFunction
   ) {
     try {
-      const { storeId } = req.params;
+      const storeId = z.string().parse(req.params.storeId);
       const session = req.user;
       await StoreService.deleteStore(session.id, parseInt(storeId));
       res.status(201).json({
@@ -110,7 +111,7 @@ export class StoreController {
     next: NextFunction
   ) {
     try {
-      const { storeId } = req.params;
+      const storeId = z.string().parse(req.params.storeId);
       const session = req.user;
       const payload = validate(
         StoreValidation.addStoreAdminValidation,
@@ -133,11 +134,16 @@ export class StoreController {
   ) {
     try {
       const session = req.user;
-      const { storeId, adminId } = req.params;
+      const paramsProperties = z
+        .object({
+          storeId: z.string(),
+          adminId: z.string(),
+        })
+        .parse({ ...req.params });
       await StoreService.deleteStoreAdmin(
         session.id,
-        parseInt(storeId),
-        parseInt(adminId)
+        parseInt(paramsProperties.storeId),
+        parseInt(paramsProperties.storeId)
       );
       res.status(201).json({
         status: "success",
@@ -154,12 +160,17 @@ export class StoreController {
     next: NextFunction
   ) {
     try {
-      const { adminId, storeId } = req.params;
+      const paramsProperties = z
+        .object({
+          storeId: z.string(),
+          adminId: z.string(),
+        })
+        .parse({ ...req.params });
       const session = req.user;
       const result = await StoreService.getStoreAdminByid(
         session.id,
-        parseInt(storeId),
-        parseInt(adminId)
+        parseInt(paramsProperties.storeId),
+        parseInt(paramsProperties.adminId)
       );
       res.status(201).json({
         status: "success",
@@ -178,7 +189,7 @@ export class StoreController {
   ) {
     try {
       const session = req.user;
-      const { storeId } = req.params;
+      const storeId = z.string().parse(req.params.storeId);
       const result = await StoreService.getStoreAdmins(
         session.id,
         parseInt(storeId)
@@ -199,7 +210,7 @@ export class StoreController {
     next: NextFunction
   ) {
     try {
-      const { storeId } = req.params;
+      const storeId = z.string().parse(req.params.storeId);
       const result = await StoreService.getProductsBystore(Number(storeId));
       res.status(201).json({
         status: "success",
@@ -217,7 +228,7 @@ export class StoreController {
     next: NextFunction
   ) {
     try {
-      const { storeId } = req.params;
+      const storeId = z.string().parse(req.params.storeId);
       const result = await StoreService.getEtalasesByStore(Number(storeId));
       res.status(201).json({
         status: "success",
@@ -235,7 +246,7 @@ export class StoreController {
     next: NextFunction
   ) {
     try {
-      const { storeId } = req.params;
+      const storeId = z.string().parse(req.params.storeId);
       const result = await StoreService.getStoreVouchers(Number(storeId));
       res.status(201).json({
         status: "success",
