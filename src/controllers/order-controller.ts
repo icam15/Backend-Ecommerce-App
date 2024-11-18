@@ -196,7 +196,7 @@ export class OrderController {
     }
   }
 
-  async changeStatusOrderByAdminStore(
+  async updateOrderStateByStoreAdmin(
     req: Request,
     res: Response,
     next: NextFunction
@@ -207,7 +207,7 @@ export class OrderController {
         OrderValidation.changeOrderStatusValidation,
         req.body as ChangeOrderStatusPayload
       );
-      const result = await OrderService.updateOrderStateByAdminStore(
+      const result = await OrderService.updateOrderStateByStoreAdmin(
         session.id,
         payload
       );
@@ -253,6 +253,31 @@ export class OrderController {
       res.status(200).json({
         status: "success",
         message: "get all order is success",
+        result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async updateOrderStateByEcommerceAdmin(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const session = req.user;
+      const payload = validate(
+        OrderValidation.changeOrderStatusValidation,
+        req.body as ChangeOrderStatusPayload
+      );
+      const result = await OrderService.updateOrderStateByEcommerceAdmin(
+        session.id,
+        payload
+      );
+      res.status(201).json({
+        status: "success",
+        message: "change order status is success",
         result,
       });
     } catch (e) {

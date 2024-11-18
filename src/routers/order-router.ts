@@ -37,12 +37,24 @@ export class OrderRouter {
     this.router.patch(
       "/change-status-by-admin",
       Authorization.storeAdmin,
-      this.orderController.changeStatusOrderByAdminStore
+      this.orderController.updateOrderStateByStoreAdmin
     );
     this.router.patch(
       "/cancel-by-admin",
       Authorization.storeAdmin,
       this.orderController.cancelOrderByAdminStore
+    );
+
+    // ecommerce store space
+    this.router.patch(
+      "/:orderId/confirm-payment",
+      Authorization.ecommerceAdmin,
+      this.orderController.updateOrderStateByEcommerceAdmin
+    );
+    this.router.get(
+      "/all",
+      Authorization.ecommerceAdmin,
+      this.orderController.getAllOrders
     );
   }
   getRouter(): Router {

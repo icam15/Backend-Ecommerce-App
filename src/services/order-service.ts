@@ -1,3 +1,4 @@
+import { ChangeOrderStatusPayload } from "./../types/order-types";
 import {
   applyDiscountVoucherStore,
   calculateShippingCost,
@@ -14,10 +15,8 @@ import {
   ApplyDiscountVoucherPayload,
   CalculateOrderPayload,
   CancelOrderPayload,
-  ChangeOrderStatusPayload,
   CreateWrapperOrderPayload,
 } from "../types/order-types";
-import { NextFunction, Response, text } from "express";
 import dayjs from "dayjs";
 import { createPaymentLink } from "../helpers/order/payment";
 import { decode } from "base64-arraybuffer";
@@ -501,7 +500,7 @@ export class OrderService {
     return { order };
   }
 
-  static async updateOrderStateByAdminStore(
+  static async updateOrderStateByStoreAdmin(
     userId: number,
     payload: ChangeOrderStatusPayload
   ) {
@@ -510,6 +509,7 @@ export class OrderService {
       userId,
       payload.orderStoreId
     );
+    const currentStatus = order.orderStatus;
 
     if (
       !Object.values(OrderStatus).includes(payload.newStatus as OrderStatus)
@@ -526,7 +526,7 @@ export class OrderService {
       [OrderStatus.CONFIRMED]: [],
       [OrderStatus.CANCELLED]: [],
     };
-    if (!allowwedTransitionStatus[order.orderStatus].includes(newStatus)) {
+    if (!allowwedTransitionStatus[currentStatus].includes(newStatus)) {
       throw new ResponseError(
         400,
         `unsupported transition order status to ${newStatus}`
@@ -575,5 +575,59 @@ export class OrderService {
       throw new ResponseError(400, "there are any order");
     }
     return orders;
+  }
+
+  static async updateOrderStateByEcommerceAdmin(
+    userId: number,
+    payload: ChangeOrderStatusPayload
+  ) {
+    const newStatus = payload.newStatus as OrderStatus;
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) {
+      throw new ResponseError(404, "user not found");
+    } else if (user.role !== "ECOMMERCEADMIN") {
+      throw new ResponseError(400, "you are not allowwed of this service");
+    }
+    const order = await prisma.order.findUnique({
+      where: {
+        id: payload.orderStoreId,
+      },
+    });
+    if (!order) {
+      throw new ResponseError(404, "order not found");
+    }
+    const currentStatus = order.orderStatus;
+
+    if (!Object.values(OrderStatus).includes(newStatus as OrderStatus)) {
+      throw new ResponseError(400, `invalid status:${newStatus}`);
+    }
+
+    const allowwedTransitionStatus: { [key in OrderStatus]: OrderStatus[] } = {
+      [OrderStatus.WAITING_FOR_PAYMENT]: [],
+      [OrderStatus.WAITING_FOR_CONFIRMATION]: [OrderStatus.PROCESS],
+      [OrderStatus.PROCESS]: [OrderStatus.SHIPPING],
+      [OrderStatus.SHIPPING]: [OrderStatus.DELIVERED],
+      [OrderStatus.DELIVERED]: [],
+      [OrderStatus.CONFIRMED]: [],
+      [OrderStatus.CANCELLED]: [],
+    };
+    if (!allowwedTransitionStatus[currentStatus].includes(newStatus)) {
+      throw new ResponseError(
+        400,
+        `unsupported transition order status to ${newStatus}`
+      );
+    }
+    return await prisma.order.update({
+      where: {
+        id: order.id,
+      },
+      data: {
+        orderStatus: newStatus,
+      },
+    });
   }
 }
